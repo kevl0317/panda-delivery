@@ -1,0 +1,5 @@
+// Illustrations follow the existing city knowledge cards. The railway is a
+// game journey connector, not a claim about a real railway alignment.
+const CITY_FEATURES=['嘉陵江','川东山乡','垫江牡丹','长江山城','三峡大坝','荆门田野','两江三镇','人造太阳','明城墙','陆家嘴','太湖','大运河','沂河','泉城','祈年殿','省会新城','黄河','江城枢纽','橘子洲','广州塔','鼎湖山','山水梧州','绿城','百色芒果','斗南鲜花'];
+function cityTile(level){const n=level-1;return `<span class="city-art" role="img" aria-label="${E.cities[n]} · ${CITY_FEATURES[n]}" style="--city-x:${n%5*25}%;--city-y:${Math.floor(n/5)*25}%"></span>`;}
+function stationCard(x,next){const cleared=!!save.best[x.id],locked=x.id>next;return `<div class="station-stop ${save.best[x.id+1]?'rail-complete':''}"><button class="level ${x.id===next?'current':''} ${cleared?'arrived':''}" data-level="${x.id}" ${locked?'disabled':''} aria-label="第${x.id}关，${E.cities[x.id-1]}，${CITY_FEATURES[x.id-1]}，${locked?'未解锁':cleared?'已抵达':'出发'}"><span class="num">${String(x.id).padStart(2,'0')}</span>${cityTile(x.id)}<span class="station-caption"><h3>${E.cities[x.id-1]}</h3><span class="stars">${cleared?'★'.repeat(save.best[x.id].stars):locked?'◆':'➜'}</span></span></button></div>`;}

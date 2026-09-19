@@ -1,0 +1,19 @@
+.level-grid {--rail-gap:32px;gap:var(--rail-gap);padding:20px 26px 25px;grid-template-columns:repeat(5,minmax(0,1fr));isolation:isolate;}
+.level-grid:before {display:none;}
+.station-stop {position:relative;min-width:0;}
+.station-stop:not(:last-child):after {content:"";position:absolute;width:var(--rail-gap);height:38px;left:100%;top:54%;transform:translateY(-50%);background:url('assets/railway.png') center/auto 110px no-repeat;opacity:.7;filter:saturate(.6);pointer-events:none;z-index:-1;}
+.station-stop.rail-complete:after {opacity:1;filter:drop-shadow(0 0 3px #ffd475);}
+.station-stop .level {width:100%;min-height:0;padding:0;display:block;overflow:hidden;border-radius:46% 46% 15px 15px;background:#f2d38a;border:2px solid #c3a56a;position:relative;transition:border-color .2s,box-shadow .2s;}
+.station-stop .level:disabled {opacity:1;cursor:not-allowed;}
+.station-stop .level.current {border-color:#fff3b9;box-shadow:0 0 22px #ffe19766,0 5px 0 #9d7838;}
+.city-art {display:block;width:100%;aspect-ratio:1;background-image:url('assets/cities-atlas.png');background-size:500% 500%;background-position:var(--city-x) var(--city-y);background-repeat:no-repeat;}
+.station-stop .level .num {position:absolute;top:13px;left:50%;transform:translateX(-50%);z-index:1;display:grid;place-items:center;background:#fff1c1dc;border:1px solid #ba9855;border-radius:50%;width:25px;height:25px;font-size:11px;font-weight:700;color:#5e5431;letter-spacing:0;box-shadow:0 2px 4px #795d3320;}
+.station-caption {position:relative;display:flex;align-items:center;justify-content:space-between;gap:4px;padding:9px 13px 11px;background:#f6d78f;border-top:1px solid #d1af67;}
+.station-stop .level h3 {font-size:20px;margin:0;letter-spacing:1px;}
+.station-stop .level .stars {font-size:12px;position:static;display:block;height:auto;color:#866322;white-space:nowrap;}
+.station-stop .level:disabled .station-caption {background:#cbb887;color:#586044;}
+.station-stop .level:disabled .city-art {filter:saturate(.72) brightness(.91);}
+.station-stop .level.arrived .station-caption {background:#f7df9d;}
+.station-stop .level.arrived .stars {color:#a86f12;}
+@media(max-width:850px){.level-grid{--rail-gap:20px;padding:18px 16px 22px;}.station-stop .level h3{font-size:17px;}.station-caption{padding:8px;}.station-stop .level .stars{font-size:10px;}}
+@media(max-width:580px){.level-grid{--rail-gap:22px;grid-template-columns:repeat(5,132px);overflow-x:auto;scroll-snap-type:x proximity;padding:17px 16px 24px;scrollbar-width:thin;scrollbar-color:#c9a668 #244a35;}.station-stop{scroll-snap-align:center;}.station-stop .level:last-child{min-height:0;}.station-stop .level{border-radius:45% 45% 12px 12px;}.station-stop .level .num{top:8px;width:22px;height:22px;font-size:10px;}.station-stop .level h3{font-size:17px;}.station-stop .level .stars{font-size:10px;}.station-caption{padding:9px 10px;}.station-stop:not(:last-child):after{height:30px;background-size:auto 90px;}}

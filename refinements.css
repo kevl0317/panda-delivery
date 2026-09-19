@@ -1,0 +1,127 @@
+/* Labels share the image coordinate system, independent of viewport size. */
+.basket .basket-body>span {
+  left:50%; top:60%; width:30%; height:20%;
+  transform:translate(-50%,-50%);
+  display:flex; align-items:center; justify-content:center;
+  padding:0; line-height:1; overflow:hidden;
+}
+.basket .basket-body>span .item-icon {width:auto;height:100%;max-width:100%;}
+.basket .basket-body>span .destination-icon {font-size:clamp(12px,1.4vw,20px);line-height:1;}
+.demo-frame>span {left:50%;top:calc(100% - 16px);bottom:auto;transform:translateX(-50%);height:14px;display:flex;align-items:center;justify-content:center;}
+.demo-frame>span .item-icon {width:auto;height:100%;}
+.belt {
+  background:url('assets/conveyor.png') center 48% / 100% 285% no-repeat;
+  border:0; box-shadow:none; border-radius:0;
+}
+.belt:before,.belt:after {display:none;}
+.two-lanes .lane.lit .belt {border:0;box-shadow:none;filter:drop-shadow(0 0 7px #ffdc78);}
+.demo-track {background:url('assets/conveyor.png') center 48% / 100% 285% no-repeat;border:0;box-shadow:none;}
+.demo-parcel {top:calc(52px + 24px * .52 - 67px * .89);}
+.demo-parcel>img {filter:drop-shadow(0 2px 1px #10271c66);}
+
+/* Anchor the visible parcel base (89% down its PNG) to the rubber surface,
+   above the conveyor's front wooden rail. Both lanes share this geometry. */
+.lane {--belt-top:73px;--belt-height:86px;--parcel-size:95px;}
+.lane>.belt {top:var(--belt-top);height:var(--belt-height);}
+.lane>.parcel {top:calc(var(--belt-top) + var(--belt-height) * .52 - var(--parcel-size) * .89);}
+.parcel .box>img {filter:drop-shadow(0 3px 2px #10271c66);}
+@media(max-width:580px){
+  .lane {--belt-top:92px;--belt-height:65px;--parcel-size:71px;}
+  .two-lanes .lane {--belt-top:79px;}
+}
+
+/* Taller baskets enlarge the actual illustrated nameplate with its symbol. */
+.lane {height:350px;}
+.basket .basket-body {top:90px;bottom:auto;height:210px;}
+.two-lanes .lane {height:320px;}
+.two-lanes .basket .basket-body {top:90px;bottom:auto;height:180px;}
+@media(max-width:850px) and (min-width:581px){
+  .basket .basket-body {height:185px;}
+  .two-lanes .basket .basket-body {height:170px;}
+}
+@media(max-width:580px){
+  .lane {height:285px;}
+  .basket .basket-body {top:78px;bottom:auto;height:125px;}
+  .two-lanes .lane {height:270px;}
+  .two-lanes .basket .basket-body {top:85px;bottom:auto;height:125px;}
+}
+
+/* Keep essential text off the detailed artwork and out of tiny type sizes. */
+.result-knowledge {display:flex;align-items:center;gap:18px;background:#f2dfaa;border:1px solid #b99b5d;border-radius:14px;padding:14px;margin:18px 0;text-align:left;}
+.result-knowledge .city-art {flex:0 0 130px;width:130px;border-radius:12px;}
+.result-knowledge p {margin:8px 0 0;}
+@media(max-width:580px){
+  .result-knowledge {gap:12px;padding:12px;}
+  .result-knowledge .city-art {flex-basis:85px;width:85px;}
+  .result-knowledge p {font-size:14px;line-height:1.65;}
+}
+.game-heading {
+  background:#173d2e; border:1px solid #91a77b;
+  border-radius:14px; padding:14px 18px; gap:16px;
+}
+.game-heading .eyebrow {
+  color:#fff1c8; font-size:14px; font-weight:700;
+  letter-spacing:1px; line-height:1.6; text-shadow:none;
+}
+.game-heading h1 {color:#fff5d9;font-size:28px;line-height:1.4;text-shadow:none;margin:5px 0 0;}
+.game-tools .quiet {background:#28553d;border-radius:9px;color:#fff6df;font-weight:700;}
+.stats {background:#173d2e;border-color:#91a77b;padding:14px 20px;gap:28px;}
+.stat {color:#fff1cd;font-size:15px;font-weight:600;line-height:1.5;white-space:nowrap;}
+.stat strong {color:#fff6d8;font-size:28px;font-weight:800;line-height:1.2;margin-top:6px;}
+.warehouse-top,.lane-name {font-size:14px;font-weight:600;letter-spacing:0;}
+.warehouse-top>span,.lane-name {background:#173d2e;color:#fff1cd;padding:4px 8px;border-radius:6px;line-height:1.5;}
+.feedback {background:#173d2e;color:#fff4ca;line-height:1.6;}
+.feedback.bad {color:#ffdfbc;}
+.rule-reject small,.rule-pictures small {font-size:14px;font-weight:600;}
+.overlay .eyebrow,.overlay .rule-detail {font-size:14px;font-weight:600;}
+.overlay .eyebrow {color:#365a36;}
+.small-note,.score-details {font-size:14px;line-height:1.7;color:#43573b;}
+dialog p {color:#3d563c;font-size:16px;line-height:1.8;}
+.result-metrics div {color:#354d2e;font-size:14px;font-weight:600;}
+nav .quiet {font-size:14px;font-weight:600;color:#fff5d7;}
+@media(max-width:580px){
+  .game-heading {padding:11px 12px;gap:8px;align-items:center;}
+  .game-heading .eyebrow {font-size:12px;letter-spacing:.5px;}
+  .game-heading h1 {font-size:22px;}
+  .game-tools {gap:6px;}
+  .game-tools .quiet,.game-tools .secondary {font-size:13px;padding:10px;}
+  .stats {padding:12px;gap:19px;}
+  .stat {font-size:14px;}
+  .stat strong {font-size:25px;}
+  .warehouse-top,.lane-name {font-size:13px;}
+  .feedback {font-size:14px;}
+  .rule-reject small,.rule-pictures small {font-size:12px;}
+  nav .quiet {font-size:13px;}
+  .result-metrics div {font-size:12px;}
+}
+
+/* Initial result focus announces the heading without selecting a control. */
+.result-title:focus {outline:none;}
+.knowledge-zoom {position:relative;float:right;width:85px;margin:10px 0 4px 12px;padding:0;border-radius:12px;background:#f2dfaa;cursor:zoom-in;}
+.panda-knowledge .knowledge-zoom .city-art {float:none;width:100%;margin:0;}
+.knowledge-zoom>span:last-child {position:absolute;right:3px;bottom:3px;background:#173d2e;color:#fff4cf;border-radius:5px;width:23px;height:23px;font-size:21px;line-height:23px;}
+dialog.city-viewer {width:min(640px,calc(100vw - 28px));max-height:94dvh;padding:14px;overflow:auto;}
+.city-viewer .city-art {width:min(100%,calc(94dvh - 125px));margin:auto;border-radius:12px;}
+.city-viewer-close {display:block;margin:0 0 14px auto;min-height:44px;}
+.city-viewer-caption {text-align:center;font-weight:700;padding-top:12px;}
+@media(max-width:580px){.knowledge-zoom {float:none;display:block;width:76px;margin:8px 0;}}
+.panda-knowledge {align-items:center;padding:12px 0;background:none;border:0;gap:10px;}
+.knowledge-panda {width:125px;flex:0 0 125px;object-fit:contain;filter:drop-shadow(0 5px 4px #25492c30);}
+.knowledge-bubble {position:relative;flex:1;min-width:0;padding:18px;background:#fff8e4;border:2px solid #c4a269;border-radius:20px;}
+.knowledge-bubble:before {content:"";position:absolute;left:-10px;top:45%;width:16px;height:16px;background:#fff8e4;border-left:2px solid #c4a269;border-bottom:2px solid #c4a269;transform:rotate(45deg);}
+.knowledge-bubble .eyebrow {display:block;color:#41653e;letter-spacing:1px;line-height:1.6;}
+.panda-knowledge .city-art {float:right;width:85px;margin:10px 0 4px 12px;}
+.knowledge-bubble:after {content:"";display:block;clear:both;}
+@media(max-width:580px){
+  .panda-knowledge {gap:6px;align-items:flex-start;}
+  .knowledge-panda {width:70px;flex-basis:70px;margin-top:24px;}
+  .knowledge-bubble {padding:12px;border-radius:15px;}
+  .knowledge-bubble:before {top:46px;}
+  .panda-knowledge .city-art {float:none;width:76px;margin:8px 0;}
+}
+.game-tools .back-home {font-size:16px;padding:11px 18px;white-space:nowrap;}
+@media(max-width:580px){
+  .game-heading {flex-wrap:wrap;}
+  .game-tools {width:100%;justify-content:space-between;}
+  .game-tools .back-home {font-size:15px;padding:11px 14px;}
+}
