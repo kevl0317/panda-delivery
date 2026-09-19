@@ -11,7 +11,7 @@ const assert=require('node:assert/strict');
  await page.evaluate(()=>{cancelAnimationFrame(raf);state.elapsed=E.timeAt([.25,.52,.79][state.basketKinds.indexOf(state.current.kind)],6.5);投递();});
  assert.equal(await page.locator('#correct').innerText(),'1');
  await page.evaluate(()=>{endParcel();});await page.click('#practiceNext');
- await page.evaluate(()=>{cancelAnimationFrame(raf);endParcel();});await page.click('#practiceNext');
+ await page.evaluate(()=>{cancelAnimationFrame(raf);state.elapsed=E.timeAt([.25,.52,.79][state.basketKinds.indexOf(state.current.kind)],6.5);投递();endParcel();});await page.click('#practiceNext');
  await page.evaluate(()=>{cancelAnimationFrame(raf);state.elapsed=E.timeAt([.25,.52,.79][state.basketKinds.indexOf(state.current.kind)],6.5);投递();endParcel();});
  assert.equal(await page.evaluate(()=>state.practiceIndex),3);
  await page.evaluate(()=>{prepare(18);officialStart();cancelAnimationFrame(raf);state.elapsed=.3;});
@@ -22,8 +22,10 @@ const assert=require('node:assert/strict');
   const result=await page.evaluate(l=>{prepare(l);officialStart();cancelAnimationFrame(raf);let guard=0;
    while(state.mode!=='result'&&guard++<50){if(state.mode==='switch'){state.mode='playing';removeOverlay();mountCurrent();}const c=state.current;if(c.yes){const basket=state.basketKinds.indexOf(c.kind);state.elapsed=E.timeAt([.25,.52,.79][basket],E.duration(l,state.index));投递();}endParcel();}
    return {correct:state.correct,passed:state.passed,mode:state.mode,stars:save.best[l]?.stars};},l);
-  assert.deepEqual(result,{correct:8,passed:4,mode:'result',stars:3});
+  assert.deepEqual(result,{correct:12,passed:0,mode:'result',stars:3});
   assert.equal(await page.locator('.result-knowledge').count(),1);
+  assert.equal(await page.locator('.knowledge-bubble .eyebrow').innerText(),await page.evaluate(l=>'熊猫讲给你听 · '+C[l-1].knowledgeTitle,l));
+  assert.ok(!(await page.locator('#modalContent').innerText()).includes('undefined'));
   assert.equal(await page.locator('.result-knowledge p').innerText(),await page.evaluate(l=>C[l-1].knowledge,l));
  }
  await page.evaluate(()=>prepare(1));await page.setViewportSize({width:390,height:844});

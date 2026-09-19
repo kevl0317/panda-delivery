@@ -119,6 +119,7 @@ dialog.city-viewer {width:min(640px,calc(100vw - 28px));max-height:94dvh;padding
   .knowledge-bubble:before {top:46px;}
   .panda-knowledge .city-art {float:none;width:76px;margin:8px 0;}
 }
+.stats + .warehouse {margin-top:28px;}
 .game-tools .back-home {font-size:16px;padding:11px 18px;white-space:nowrap;}
 @media(max-width:580px){
   .game-heading {flex-wrap:wrap;}
