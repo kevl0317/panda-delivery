@@ -1,0 +1,264 @@
+/* Journey finale: celebration banner, illustrated route map, chapter badges and a closing letter. */
+/* Bottom space is padding, not margin, so the page background continues behind the last buttons. */
+.journey-finale {margin:14px 0 0;padding-bottom:52px;color:#27452f;}
+.journey-finale h1,.journey-finale h2,.finale-badge strong,.route-title strong,.letter-card {font-family:"STKaiti","KaiTi","Microsoft YaHei",serif;}
+
+/* Celebration banner */
+.finale-hero {position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:210px minmax(0,1fr) auto;align-items:center;gap:0 26px;min-height:246px;padding:0 28px 0 24px;border:2px solid #d8b56a;border-radius:26px;background:radial-gradient(circle at 12% 58%,#f7cf7a45,transparent 28%),radial-gradient(ellipse at 62% -30%,#6aa77b40,transparent 60%),linear-gradient(118deg,#21553d,#153a2b 52%,#0f2c21);box-shadow:inset 0 0 0 6px #173d2e,inset 0 0 0 7px #d8b56a73,0 8px 0 #0b241a8c,0 22px 46px #06170f5c;}
+.hero-burst {position:absolute;z-index:-1;left:-150px;top:50%;width:620px;aspect-ratio:1;translate:0 -50%;background:repeating-conic-gradient(#ffe39a24 0 8deg,transparent 8deg 18deg);-webkit-mask:radial-gradient(circle,#000 14%,transparent 64%);mask:radial-gradient(circle,#000 14%,transparent 64%);animation:finale-spin 70s linear infinite;}
+.hero-confetti {position:absolute;inset:0;z-index:-1;pointer-events:none;}
+.hero-confetti i {position:absolute;top:-18px;left:var(--x);width:8px;height:14px;border-radius:2px;background:var(--c);opacity:0;animation:finale-confetti var(--t) var(--d) cubic-bezier(.25,.5,.45,1) both;}
+.hero-confetti i:nth-child(3n) {width:9px;height:9px;border-radius:50%;}
+.hero-confetti i:nth-child(4n+1) {width:5px;height:16px;}
+.hero-panda {align-self:end;width:210px;height:232px;margin-top:14px;object-fit:contain;object-position:bottom;filter:drop-shadow(0 12px 12px #06170f73);animation:finale-panda-in .9s cubic-bezier(.2,1.35,.4,1) both;}
+.hero-copy {min-width:0;padding:28px 0 30px;}
+.hero-kicker {display:inline-flex;align-items:center;gap:10px;color:#ecd08e;font-size:14px;font-weight:700;letter-spacing:4px;}
+.hero-kicker:before {content:"";width:28px;height:2px;border-radius:2px;background:currentColor;opacity:.7;}
+.finale-hero h1 {margin:10px 0 8px;font-size:56px;line-height:1.14;letter-spacing:3px;color:#ffefbd;text-shadow:0 3px 0 #0b2519,0 9px 22px #00000055;animation:finale-rise .7s .15s both;}
+.finale-hero h1 span {display:inline-block;}
+.finale-hero p {margin:0;color:#f3e7c6;font-size:17px;line-height:1.7;animation:finale-rise .7s .3s both;}
+.hero-stats {display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 0;padding:0;list-style:none;animation:finale-rise .7s .45s both;}
+.hero-stats li {display:flex;align-items:baseline;gap:9px;padding:9px 16px 10px;border:1px solid #d8b56a85;border-radius:14px;background:#0a2419a6;box-shadow:inset 0 1px #ffffff14;}
+.hero-stats b {font-size:27px;line-height:1;color:#ffe29a;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.hero-stats small {margin-left:3px;font-size:15px;color:#e5cd92;}
+.hero-stats span {font-size:14px;color:#d9e5c6;white-space:nowrap;}
+.hero-home {align-self:start;margin-top:26px;white-space:nowrap;}
+
+/* Map panel */
+.finale-layout {display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px;align-items:start;margin-top:22px;}
+.journey-map-panel {min-width:0;padding:18px 20px 20px;border:2px solid #cfae6a;border-radius:26px;background:linear-gradient(#fdf4dc,#f8ebc9);box-shadow:0 8px 0 #7a5b2c40,0 20px 42px #10261a3d;}
+.map-head {display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;margin:0 4px 14px;}
+.map-head h2 {margin:0;font-size:30px;line-height:1.2;letter-spacing:2px;color:#26442e;}
+.map-legend {display:flex;flex-wrap:wrap;gap:6px 14px;margin:0;padding:0;list-style:none;font-size:13px;font-weight:700;color:#4c613f;}
+.map-legend li {display:flex;align-items:center;gap:6px;}
+.map-replay {margin-left:auto;min-height:40px;padding:8px 16px;border:2px solid #cfae6a;border-radius:12px;background:#fff7e2;color:#2f5236;font-size:14px;font-weight:800;box-shadow:0 3px 0 #b8975a;transition:transform .15s;}
+.map-replay:hover {transform:translateY(-2px);}
+.map-replay:active {transform:translateY(1px);box-shadow:0 1px 0 #b8975a;}
+.journey-map-scroll {overflow-x:auto;border-radius:20px;scrollbar-width:thin;scrollbar-color:#c9a668 transparent;}
+.journey-map-frame {position:relative;border-radius:20px;background:radial-gradient(ellipse at 50% 45%,#fcf3da 0%,#f5e4b8 68%,#e8cf98 100%);box-shadow:inset 0 0 0 1px #c9a86a,inset 0 0 46px #a7792c38;}
+.journey-map-frame:before {content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:.5;mix-blend-mode:multiply;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .55 0 0 0 0 .42 0 0 0 0 .22 0 0 0 .32 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");}
+.journey-map-frame:after {content:"";position:absolute;inset:9px;border:1.5px solid #c9a86a9c;border-radius:14px;pointer-events:none;box-shadow:0 0 0 3px #fbf1d680,0 0 0 4.5px #c9a86a52;}
+.journey-map {position:relative;display:block;width:100%;height:auto;font:700 15px "Microsoft YaHei","PingFang SC",sans-serif;}
+.map-swipe {display:none;}
+
+/* Painted terrain fills the map; labels and compass remain crisp at any size. */
+.journey-map-frame {overflow:hidden;}
+.journey-map .map-landscape {pointer-events:none;}
+.journey-map .t-name {font:600 14px "STKaiti","KaiTi",serif;letter-spacing:6px;fill:#8a6b3b;text-anchor:middle;}
+.journey-map .c-ring {fill:#fbf1d6b3;stroke:#b99a63;stroke-width:1.6;}
+.journey-map .c-ring2 {fill:none;stroke:#b99a63;stroke-width:1;stroke-dasharray:2 3;}
+.journey-map .c-minor {fill:#c9ab77;}
+.journey-map .c-major {fill:#2f4c33;}
+.journey-map .c-lit {fill:#d7b261;}
+.journey-map .c-pin {fill:#fbf1d6;stroke:#2f4c33;stroke-width:1.4;}
+.journey-map .c-north {font:700 17px "STKaiti","KaiTi",serif;fill:#b13f31;text-anchor:middle;}
+
+/* River names follow the original mapped courses above the illustration. */
+.journey-map .w-name {font:700 16px "STKaiti","KaiTi",serif;letter-spacing:10px;fill:#387d85;paint-order:stroke;stroke:#f8ecc9;stroke-width:4px;stroke-linejoin:round;}
+.journey-map .w-name.is-yellow {fill:#8f6a24;}
+.journey-map .w-label {font:700 13px "STKaiti","KaiTi",serif;letter-spacing:2px;fill:#387d85;paint-order:stroke;stroke:#f8ecc9;stroke-width:3.5px;stroke-linejoin:round;}
+
+/* Roads, stations and the panda pin */
+.map-route path {fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.map-route .route-halo {stroke:#fcf3da;stroke-width:17;}
+.map-route .route-casing {stroke:color-mix(in srgb,var(--route) 70%,#1c2718);stroke-width:10.5;}
+.map-route .route-core {stroke:var(--route);stroke-width:7;}
+.map-route .route-dash {stroke:#fff6d8;stroke-width:1.6;stroke-dasharray:5 7;opacity:.95;transition:opacity .35s;}
+.map-route.is-hidden {visibility:hidden;}
+.map-route.is-drawing .route-dash,.map-route.is-drawing .map-shield {opacity:0;}
+.map-shield {transition:opacity .35s;}
+.map-shield .shield-body {fill:#1d6a3d;stroke:#fdf6e0;stroke-width:2;filter:drop-shadow(0 2px 1px #2f22104d);}
+.map-shield .shield-cap {fill:#cf3b30;}
+.map-shield .shield-text {font:800 13px "Microsoft YaHei",sans-serif;fill:#fff;text-anchor:middle;letter-spacing:.3px;}
+.map-stop circle {fill:#fffaf0;stroke:var(--route);stroke-width:3.4;}
+.map-stop.is-interchange circle {fill:#fffdf6;stroke:#27402c;stroke-width:3.6;}
+.map-stop text,.journey-map .map-note {fill:#2a462f;paint-order:stroke;stroke:#fbf0d4;stroke-width:4.5px;stroke-linejoin:round;}
+.map-stop.is-interchange text {font-size:16px;}
+.journey-map .map-note {font-size:12.5px;font-weight:600;fill:#6e6a4a;}
+.map-stop,.map-hub[data-level] {cursor:zoom-in;}
+.map-stop:hover circle {stroke-width:4.6;}
+.map-hub .hub-art {transform-box:fill-box;transform-origin:center;}
+.map-hub.is-reached .hub-art {animation:finale-hub-pop .6s cubic-bezier(.3,1.7,.5,1);}
+.map-hub:hover .hub-art {scale:1.06;transition:scale .2s;}
+.map-hub .hub-shadow {fill:#5c3f1738;}
+.map-hub .hub-ring {fill:var(--route);}
+.map-hub .hub-gap {fill:#fff3d0;}
+.map-hub .hub-gold {fill:none;stroke:#e0b04f;stroke-width:2.2;}
+.map-hub .hub-brand-bg {fill:#265e42;}
+.map-hub .hub-brand {font:26px "STKaiti","KaiTi",serif;fill:#f1ce83;text-anchor:middle;}
+.map-hub .hub-label rect {fill:var(--route);stroke:#fff6dc;stroke-width:2;filter:drop-shadow(0 2px 1.5px #2f22104d);}
+.map-hub .hub-label text {font-size:14px;fill:#fffaf0;text-anchor:middle;letter-spacing:.5px;}
+.map-pin {pointer-events:none;}
+.map-pin .pin-shadow {fill:#3b2a1247;}
+.map-pin .pin-body {animation:finale-pin-bob 1.8s ease-in-out infinite;}
+.map-pin .pin-drop {fill:#f2c35c;stroke:#6b4a1a;stroke-width:2;}
+.map-pin .pin-window {fill:#fff7e2;}
+.journey-map [data-chapters] {transition:opacity .3s;}
+.journey-map.has-focus [data-chapters].is-muted {opacity:.2;}
+.journey-map.has-focus .map-route:not(.is-muted) .route-core {stroke-width:8;}
+
+/* Shared road-number shield in the page chrome */
+.road-shield {display:inline-grid;place-items:center;flex:none;min-width:36px;height:24px;padding:5px 6px 0;border-radius:5px;background:linear-gradient(#cf3b30 0 5px,#1d6a3d 5px);box-shadow:inset 0 0 0 1.5px #fdf6e0,0 1px 2px #2f22104d;color:#fff;font:800 12px/1 "Microsoft YaHei",sans-serif;letter-spacing:.3px;}
+
+/* Route detail below the map */
+.finale-route {margin-top:16px;padding:16px 18px;border-radius:20px;background:linear-gradient(#1b4533,#143628);color:#fff1cc;box-shadow:inset 0 0 0 1px #d8b56a4d;}
+.route-overview p {margin:12px 0 0;color:#d9e5c6;font-size:14px;text-align:center;}
+.route-line {display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px 2px;}
+.route-end {padding:0 4px;color:#ffe7a8;font-size:16px;font-weight:800;white-space:nowrap;}
+/* Each leg is a road running into the next city, with its number on the road. */
+.route-leg {position:relative;display:grid;place-items:center;width:94px;min-height:36px;padding:0;border:0;border-radius:10px;background:none;}
+.route-leg:before {content:"";position:absolute;left:2px;right:10px;top:50%;height:3px;margin-top:-1.5px;border-radius:2px;background:var(--route);box-shadow:0 0 0 1px #0b241a80;}
+.route-leg:after {content:"";position:absolute;right:1px;top:50%;border-style:solid;border-width:6px 0 6px 10px;border-color:transparent transparent transparent var(--route);translate:0 -50%;}
+.route-leg span {position:relative;display:grid;place-items:center;min-width:48px;height:26px;padding:0 9px;border-radius:99px;background:var(--route);color:#fff;font-size:13px;font-weight:800;box-shadow:0 0 0 2px #fff1cc,0 3px 6px #0006;transition:transform .15s;}
+.route-leg:hover span {transform:translateY(-2px) scale(1.06);}
+.route-head {display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.route-head .road-shield {min-width:44px;height:30px;padding-top:7px;background:linear-gradient(#cf3b30 0 7px,#1d6a3d 7px);font-size:14px;}
+.route-title {min-width:0;}
+.route-title strong {display:block;color:#ffe7a8;font-size:23px;line-height:1.25;letter-spacing:1px;}
+.route-title span {color:#d7e3c3;font-size:14px;}
+.route-stars {margin-left:auto;color:#ffd978;font-size:17px;font-weight:800;white-space:nowrap;}
+.route-all {min-height:40px;padding:6px 14px;border:1px solid #d8b56a99;border-radius:10px;background:#0c271c;color:#fff1cc;font-size:14px;font-weight:700;}
+.route-all:hover {background:#24533d;}
+.route-stops {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:14px;}
+.route-stop {position:relative;display:grid;justify-items:center;gap:5px;min-width:0;padding:8px 8px 10px;border:2px solid #d8b56a;border-radius:16px;background:#fff3d3;color:#27452f;cursor:zoom-in;box-shadow:0 4px 0 #0b241a73;transition:transform .15s;animation:finale-rise .45s both;}
+.route-stop:nth-child(2) {animation-delay:.05s;}
+.route-stop:nth-child(3) {animation-delay:.1s;}
+.route-stop:nth-child(4) {animation-delay:.15s;}
+.route-stop:nth-child(5) {animation-delay:.2s;}
+.route-stop:hover {transform:translateY(-3px);}
+.route-stop .city-art {width:100%;border-radius:11px;}
+.stop-name {display:flex;align-items:baseline;gap:5px;font-size:16px;font-weight:800;white-space:nowrap;}
+.stop-name small {font-size:11px;color:#8a7a52;font-variant-numeric:tabular-nums;}
+.stop-stars {color:#c48a1d;font-size:13px;letter-spacing:1px;}
+
+/* Chapter badges */
+.finale-badges {display:grid;gap:12px;}
+.finale-badge {position:relative;overflow:hidden;display:grid;grid-template-columns:76px minmax(0,1fr) auto;align-items:center;gap:14px;width:100%;padding:13px 14px 15px 13px;border:2px solid #d2b173;border-radius:20px;background:linear-gradient(#fff7e0,#f7e5ba);color:#27452f;text-align:left;box-shadow:0 5px 0 #6d52294d,0 12px 22px #10261a33;transition:transform .18s,border-color .18s,box-shadow .18s;}
+.finale-badge:hover {transform:translateY(-2px);}
+.finale-badge[aria-pressed=true] {border-color:var(--badge);background:linear-gradient(100deg,color-mix(in srgb,var(--badge) 24%,#fff7e0),#fff7e0 72%);box-shadow:0 5px 0 color-mix(in srgb,var(--badge) 62%,#2b1f0d),0 0 0 4px color-mix(in srgb,var(--badge) 28%,transparent),0 12px 22px #10261a33;transform:translateX(-6px);}
+.badge-medal {position:relative;isolation:isolate;width:76px;aspect-ratio:1;transition:filter .4s;}
+.badge-medal:before,.badge-medal:after {content:"";position:absolute;z-index:-1;bottom:-12px;width:17px;height:30px;background:var(--badge);clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%);}
+.badge-medal:before {left:17px;rotate:20deg;}
+.badge-medal:after {right:17px;rotate:-20deg;}
+.badge-medal .city-art {width:100%;border-radius:50%;border:4px solid #e5b957;box-shadow:0 0 0 3px var(--badge),0 5px 10px #3b2a1250;}
+.badge-check {position:absolute;right:-3px;bottom:-1px;display:grid;place-items:center;width:25px;height:25px;border:2px solid #fff7e0;border-radius:50%;background:var(--badge);color:#fff;font-size:13px;font-weight:900;}
+.badge-text {min-width:0;}
+.badge-meta {display:flex;align-items:center;gap:7px;color:#5b6d49;font-size:13px;font-weight:700;white-space:nowrap;}
+.finale-badge strong {display:block;margin:5px 0 2px;font-size:25px;line-height:1.2;letter-spacing:1px;}
+.badge-seal {color:#5d5a3a;font-size:13px;}
+.badge-stars {align-self:start;margin-top:3px;color:#b27a1c;font-size:15px;font-weight:800;white-space:nowrap;}
+.badge-stars small {color:#8a7a52;font-size:12px;}
+.finale-badge.is-waiting .badge-medal {filter:grayscale(.9) opacity(.5);}
+.finale-badge.is-waiting .badge-check {scale:0;}
+.finale-badge.is-stamped .badge-medal {animation:finale-stamp .6s cubic-bezier(.3,1.6,.5,1);}
+.finale-badge.is-stamped .badge-check {animation:finale-check .5s .2s cubic-bezier(.3,1.8,.5,1) both;}
+.finale-badge.is-stamped:after {content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 38%,#fffbe9d9 50%,transparent 62%) -160% 0/260% 100% no-repeat;animation:finale-shine 1s .1s ease-out both;}
+.finale-badge.is-locked .badge-medal {filter:grayscale(1) opacity(.45);}
+.finale-badge.is-locked .badge-check {background:#9a8f73;}
+
+/* Closing letter: ruled lines sit under each 36px line of text. */
+.finale-letter {display:grid;justify-items:center;gap:22px;margin-top:30px;}
+.letter-card {--lh:36px;--pt:34px;position:relative;width:min(780px,100%);padding:var(--pt) 214px 30px 40px;border:12px solid transparent;border-radius:14px;background:linear-gradient(transparent calc(var(--lh) - 1px),#d9c4956b calc(var(--lh) - 1px)) 0 calc(var(--pt) - 5px)/100% var(--lh) repeat-y padding-box,linear-gradient(#fffaea,#fbefcf) padding-box,repeating-linear-gradient(-45deg,#bf5a4c 0 12px,#fff7e2 12px 20px,#2e8574 20px 32px,#fff7e2 32px 40px) border-box;color:#2d4730;font-size:20px;line-height:var(--lh);box-shadow:0 10px 0 #5c43214d,0 22px 44px #10261a45;}
+.letter-card p {margin:0;}
+.letter-to {font-size:23px;font-weight:700;}
+.letter-sign {text-align:right;font-size:21px;font-weight:700;color:#355a39;}
+.letter-sign:before {content:"—— ";}
+.letter-stamp {position:absolute;top:24px;right:30px;display:grid;justify-items:center;width:112px;padding:10px 10px 8px;background:linear-gradient(#f9dd96,#eebf62);rotate:4deg;filter:drop-shadow(0 4px 4px #3b2a124d);-webkit-mask:radial-gradient(circle,#0000 3.4px,#000 3.9px) -5px -5px/10px 10px round,linear-gradient(#000 0 0) 5px 5px/calc(100% - 10px) calc(100% - 10px) no-repeat;mask:radial-gradient(circle,#0000 3.4px,#000 3.9px) -5px -5px/10px 10px round,linear-gradient(#000 0 0) 5px 5px/calc(100% - 10px) calc(100% - 10px) no-repeat;}
+.letter-stamp img {width:84px;height:90px;object-fit:cover;object-position:50% 12%;border:2px solid #fff5d8;border-radius:4px;background:radial-gradient(circle at 50% 40%,#fff3c9,#9bc27f);}
+.letter-stamp span {margin-top:4px;color:#5a3f15;font:700 12px/1.2 "Microsoft YaHei",sans-serif;letter-spacing:1px;}
+.letter-stamp b {position:absolute;top:13px;right:14px;color:#b13f31;font:900 12px/1 "Microsoft YaHei",sans-serif;}
+/* The postmark cancels the stamp: ring over its lower-left corner, waves across it. */
+.letter-postmark {position:absolute;top:118px;right:14px;width:176px;rotate:-10deg;pointer-events:none;fill:none;stroke:#b8433499;stroke-width:2.2;}
+.letter-postmark .pm-wave {stroke-width:2.6;stroke-linecap:round;}
+.letter-postmark text {stroke:none;fill:#b84334b3;font-family:"Microsoft YaHei",sans-serif;text-anchor:middle;}
+.letter-postmark .pm-arc {font-size:11px;font-weight:700;letter-spacing:1.2px;text-anchor:start;}
+.letter-postmark .pm-city {font-size:19px;font-weight:900;letter-spacing:3px;}
+.letter-postmark .pm-date {font-size:11px;font-weight:700;letter-spacing:2px;}
+.letter-actions {display:flex;flex-wrap:wrap;justify-content:center;gap:14px;}
+
+@keyframes finale-spin {to {rotate:360deg;}}
+@keyframes finale-confetti {0% {opacity:0;transform:translateY(0) rotate(0);} 8%,82% {opacity:1;} 100% {opacity:0;transform:translateY(290px) rotate(var(--r));}}
+@keyframes finale-panda-in {0% {opacity:0;transform:translateY(60px) scale(.8);} 100% {opacity:1;transform:none;}}
+@keyframes finale-rise {0% {opacity:0;transform:translateY(12px);} 100% {opacity:1;transform:none;}}
+@keyframes finale-hub-pop {0% {scale:1;} 40% {scale:1.28;} 100% {scale:1;}}
+@keyframes finale-pin-bob {50% {translate:0 -4px;}}
+@keyframes finale-stamp {0% {scale:1.35;rotate:-12deg;} 100% {scale:1;rotate:0deg;}}
+@keyframes finale-check {0% {scale:0;} 100% {scale:1;}}
+@keyframes finale-shine {100% {background-position:160% 0;}}
+
+@media(max-width:1180px){
+ .finale-layout {grid-template-columns:1fr;}
+ .finale-badges {grid-template-columns:repeat(auto-fit,minmax(260px,1fr));}
+ .finale-badge[aria-pressed=true] {transform:translateY(-4px);}
+}
+@media(max-width:850px){
+ .finale-hero {grid-template-columns:150px minmax(0,1fr);padding:0 22px 0 14px;}
+ .hero-panda {width:150px;height:190px;}
+ .finale-hero h1 {font-size:42px;letter-spacing:2px;}
+ .hero-home {grid-column:1/-1;justify-self:end;margin:0 0 18px;order:3;}
+ .hero-copy {padding:24px 0 16px;}
+ .route-stops {gap:8px;}
+ .letter-card {padding-right:170px;padding-left:28px;font-size:18px;}
+ .letter-stamp {right:20px;width:98px;}
+ .letter-stamp img {width:72px;height:78px;}
+ .letter-postmark {top:104px;right:6px;width:150px;}
+}
+@media(max-width:580px){
+ .journey-finale {margin-top:8px;padding-bottom:36px;}
+ .finale-hero {display:block;padding:18px 16px;border-radius:22px;}
+ .hero-burst {left:auto;right:-230px;top:120px;width:480px;}
+ .hero-panda {position:absolute;right:2px;top:18px;width:104px;height:124px;margin:0;}
+ .hero-copy {padding:0;}
+ .hero-kicker {font-size:12px;letter-spacing:2px;}
+ .hero-kicker:before {width:16px;}
+ .finale-hero h1 {max-width:calc(100% - 104px);margin:8px 0;font-size:32px;letter-spacing:1px;}
+ .finale-hero p {max-width:calc(100% - 96px);font-size:14px;}
+ .hero-stats {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:14px;}
+ .hero-stats li {flex-direction:column;align-items:center;gap:4px;padding:8px 4px;}
+ .hero-stats b {font-size:20px;}
+ .hero-stats small {font-size:12px;}
+ .hero-stats span {font-size:12px;}
+ .hero-home {display:block;width:100%;margin:14px 0 0;}
+ .finale-layout {margin-top:16px;gap:16px;}
+ .journey-map-panel {padding:14px 10px 12px;border-radius:22px;}
+ .map-head {gap:8px 12px;margin:0 4px 10px;}
+ .map-head h2 {font-size:24px;}
+ .map-legend {order:3;gap:6px 10px;font-size:12px;}
+ .map-replay {min-height:38px;padding:6px 12px;font-size:13px;}
+ .journey-map-frame {width:760px;}
+ .map-swipe {display:block;margin:8px 0 0;color:#6b6a45;font-size:12px;font-weight:600;text-align:center;}
+ .finale-route {margin-top:10px;padding:12px;}
+ .route-end {padding:0 3px;font-size:14px;}
+ .route-leg {width:62px;}
+ .route-leg span {min-width:40px;height:24px;padding:0 6px;font-size:12px;}
+ .route-title strong {font-size:20px;}
+ .route-title span {font-size:13px;}
+ .route-stars {margin-left:0;font-size:15px;}
+ .route-all {margin-left:auto;}
+ .route-stops {gap:5px;}
+ .route-stop {gap:3px;padding:5px 4px 7px;border-radius:12px;}
+ .route-stop .city-art {border-radius:8px;}
+ .stop-name {flex-direction:column;align-items:center;gap:0;font-size:13px;}
+ .stop-name small {font-size:10px;}
+ .stop-stars {font-size:9px;letter-spacing:0;}
+ .finale-badges {grid-template-columns:1fr;gap:10px;}
+ .finale-badge {grid-template-columns:62px minmax(0,1fr) auto;gap:12px;padding:11px 12px 13px 11px;}
+ .badge-medal {width:62px;}
+ .badge-medal:before {left:12px;}
+ .badge-medal:after {right:12px;}
+ .finale-badge strong {font-size:22px;}
+ .letter-card {--lh:31px;--pt:134px;padding:var(--pt) 18px 20px;border-width:10px;font-size:17px;}
+ .letter-to {font-size:20px;}
+ .letter-sign {font-size:18px;}
+ .letter-stamp {top:16px;right:16px;width:88px;padding:8px 8px 6px;}
+ .letter-stamp img {width:64px;height:70px;}
+ .letter-stamp span {font-size:10px;}
+ .letter-stamp b {top:10px;right:10px;font-size:10px;}
+ .letter-postmark {top:30px;left:12px;right:auto;width:160px;rotate:-8deg;}
+ .letter-actions {width:100%;}
+ .letter-actions button {flex:1 1 140px;}
+}
+@media(prefers-reduced-motion:reduce){
+ .hero-burst,.hero-panda,.finale-hero h1,.finale-hero p,.hero-stats,.map-pin .pin-body,.map-hub.is-reached .hub-art,.finale-badge.is-stamped .badge-medal,.finale-badge.is-stamped .badge-check,.route-stop {animation:none;}
+ .hero-confetti,.finale-badge.is-stamped:after {display:none;}
+}

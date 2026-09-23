@@ -6,7 +6,10 @@
   padding:0; line-height:1; overflow:hidden;
 }
 .basket .basket-body>span .item-icon {width:auto;height:100%;max-width:100%;}
-.basket .basket-body>span .destination-icon {font-size:clamp(12px,1.4vw,20px);line-height:1;}
+.destination-icon {color:#175239;font-weight:900;text-shadow:none;}
+.basket .basket-body>span .destination-icon {background:none;padding:0;border-radius:0;font-size:clamp(14px,1.7vw,24px);line-height:1.15;}
+.basket .basket-body>span:has(.destination-icon) {width:40%;}
+@media(max-width:580px){.basket .basket-body>span .destination-icon {font-size:12px;}}
 .demo-frame>span {left:50%;top:calc(100% - 16px);bottom:auto;transform:translateX(-50%);height:14px;display:flex;align-items:center;justify-content:center;}
 .demo-frame>span .item-icon {width:auto;height:100%;}
 .belt {
@@ -125,4 +128,149 @@ dialog.city-viewer {width:min(640px,calc(100vw - 28px));max-height:94dvh;padding
   .game-heading {flex-wrap:wrap;}
   .game-tools {width:100%;justify-content:space-between;}
   .game-tools .back-home {font-size:15px;padding:11px 14px;}
+}
+
+/* Keep the journey visual, with short labels and optional rule details. */
+.journey-counts {display:flex;align-items:center;gap:20px;}
+.journey-counts b {font-variant-numeric:tabular-nums;color:#fff5d5;}
+.primary,.secondary,.quiet,.chapter {min-height:44px;touch-action:manipulation;}
+.overlay .rule-detail {min-height:40px;padding:8px 12px;border-radius:8px;}
+.primary:active:not(:disabled),.secondary:active:not(:disabled) {transform:translateY(1px);}
+nav .quiet {border-radius:10px;}
+nav .quiet:hover,.game-tools .quiet:hover {background:#41674a;}
+button:focus-visible,summary:focus-visible {outline:3px solid #ffd982;outline-offset:4px;}
+dialog button:focus-visible,dialog summary:focus-visible,.overlay button:focus-visible {outline-color:#386640;}
+.score-details summary {min-height:44px;padding:10px 0;border-radius:5px;}
+dialog {max-height:calc(100dvh - 40px);overflow-y:auto;}
+dialog .modal-note,dialog .collection-summary {background:#eee3c4;border:1px solid #d4c292;border-radius:10px;padding:12px 15px;color:#3e5734;font-size:14px;}
+.collection-summary strong {font-variant-numeric:tabular-nums;color:#265e42;}
+dialog .collection-empty {padding:26px 14px;text-align:center;border:1px dashed #baa66f;border-radius:12px;background:#fff7e5;color:#49603d;}
+.modal-actions {align-items:center;}
+@media(max-width:580px){
+  /* Keep the mascot and its gentle rotation inside the viewport gutter. */
+  .courier-art {right:-8px;}
+  .section-top {gap:10px;flex-wrap:wrap;}
+  .journey-counts {gap:12px;}
+  .journey-counts span {font-size:12px;}
+  .overlay .actions {gap:10px;}
+  .tutorial-art {max-width:100%;}
+  dialog {padding:20px;max-height:calc(100dvh - 28px);}
+  .modal-actions {gap:10px;}
+  .modal-actions button {flex:1 1 auto;}
+}
+@media(max-width:360px){
+  header {gap:8px;}
+  .brand {font-size:15px;gap:5px;}
+  nav {padding:0 3px;}
+  nav .quiet {font-size:12px;padding:8px 6px;}
+}
+
+.feedback:empty {visibility:hidden;}
+.result-metrics {grid-template-columns:minmax(0,1fr);max-width:260px;margin:18px auto;text-align:center;}
+
+/* The outer response leaves the existing image breathing animation running. */
+.courier-button {display:block;width:100%;min-width:0;padding:0;border:0;background:none;border-radius:24px;line-height:0;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.courier-reaction {display:block;pointer-events:none;}
+.courier-button .courier-art {display:block;user-select:none;}
+@media(max-width:580px){
+  .courier-button {position:absolute;width:210px;height:285px;right:-8px;top:65px;z-index:1;}
+  .courier-button .courier-art {position:static;width:100%;height:285px;}
+  .hero>div:first-child {pointer-events:none;}
+  .hero>div:first-child button {pointer-events:auto;}
+}
+
+/* Keep both sorting lanes and the action button together on laptop screens. */
+.two-lanes .lane {height:210px;--belt-top:48px;--belt-height:62px;--parcel-size:80px;}
+.two-lanes .lane+.lane {margin-top:6px;}
+.two-lanes .basket {top:24px;height:150px;}
+.two-lanes .basket .basket-body {top:72px;height:125px;}
+.two-lanes .lane-name {top:0;}
+@media(min-width:581px) and (max-height:850px){
+ body:has(.two-lanes) header {height:52px;}
+ body:has(.two-lanes) .game-heading {margin:8px 0;padding:8px 14px;}
+ body:has(.two-lanes) .game-heading h1 {font-size:23px;margin:0;}
+ body:has(.two-lanes) .stats {padding:8px 16px;}
+ body:has(.two-lanes) .stat strong {font-size:24px;margin-top:2px;}
+ .stats + .two-lanes {margin-top:16px;}
+ .two-lanes.warehouse {padding:12px 18px;}
+ .two-lanes .lane {height:clamp(140px,calc((100svh - 340px)/2),210px);--belt-top:35px;--belt-height:52px;--parcel-size:68px;}
+ .two-lanes .basket {top:16px;height:112px;}
+ .two-lanes .basket .basket-body {top:60px;height:100px;}
+ .two-lanes .game-bottom {min-height:44px;padding:0;margin-top:0;}
+ .two-lanes .spacekey {padding:8px 22px;}
+}
+@media(max-width:580px){
+ .two-lanes .lane {height:195px;--belt-top:54px;--belt-height:55px;--parcel-size:65px;}
+ .two-lanes .basket {top:30px;height:125px;}
+ .two-lanes .basket .basket-body {top:68px;height:115px;}
+ .two-lanes .game-bottom {margin-top:4px;}
+}
+
+.two-lanes .parcel .box {width:var(--parcel-size);height:var(--parcel-size);}
+.two-lanes .parcel .label .item-icon {width:85%;height:85%;}
+@media(min-width:581px) and (max-height:650px){
+ .two-lanes .basket .basket-body {top:48px;height:85px;}
+}
+
+.knowledge-bubble ruby,.collection ruby {ruby-align:center;ruby-position:over;}
+.knowledge-bubble rt,.collection rt {font-family:"Microsoft YaHei",sans-serif;font-size:12px;font-weight:600;color:#315c3c;letter-spacing:0;}
+.knowledge-bubble:has(ruby) .eyebrow,.collection h3:has(ruby) {line-height:2.3;}
+.knowledge-bubble p:has(ruby),.collection p:has(ruby) {line-height:2.2;}
+
+/* Parcel selection uses the basket highlight, not a keyboard outline. */
+.parcel:focus,.parcel:focus-visible {outline:none;}
+
+/* Keep rapid taps and drags inside the game from selecting its artwork. */
+.warehouse,.warehouse *,.game-heading,.game-heading *,.stats,.stats *,button,button * {-webkit-user-select:none;user-select:none;}
+.warehouse img,button img {-webkit-user-drag:none;}
+.parcel {touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+
+/* Readings in the dark game header remain independent of the knowledge card. */
+.game-heading .game-city {white-space:nowrap;}
+.game-heading ruby {ruby-align:center;ruby-position:over;}
+.game-heading rt {font-family:"Microsoft YaHei",sans-serif;font-size:14px;font-weight:600;color:#ffe4a0;letter-spacing:0;line-height:1.2;text-shadow:none;}
+.game-heading h1:has(ruby) {line-height:1.8;}
+@media(max-width:580px){.game-heading rt {font-size:12px;}}
+
+/* Leave a visible gap between the reading and the character below it. */
+.game-heading .pinyin-reading {display:inline-block;transform:translateY(-5px);font-style:normal;}
+.game-heading h1:has(ruby) {padding-top:5px;}
+.knowledge-bubble .pinyin-reading,.collection .pinyin-reading {display:inline-block;transform:translateY(-3px);font-style:normal;}
+.knowledge-bubble:has(ruby) .eyebrow,.collection h3:has(ruby) {padding-top:3px;}
+
+/* Point from beside the parcel so the category label remains visible. */
+.demo-hand {left:248px;top:24px;font-size:34px;line-height:1;animation-name:demo-point;pointer-events:none;}
+.demo-spark {left:244px;top:8px;font-size:16px;pointer-events:none;}
+@keyframes demo-point {
+  0%,47%,85%,100% {opacity:0;transform:translateX(8px);}
+  55%,65% {opacity:1;transform:translateX(0);}
+  75% {opacity:0;transform:translateX(8px);}
+}
+
+@media(max-width:360px){.tutorial-art {width:300px;max-width:none;transform:scale(.8);transform-origin:center;}}
+
+/* City names must fit the shallower nameplates in compact dual-line layouts. */
+.two-lanes .basket .basket-body>span .destination-icon {font-size:clamp(12px,1.4vw,16px);line-height:1;}
+
+/* Two independent deliveries introduce the final chapter without extra copy. */
+.tutorial-pair {width:320px;max-width:100%;height:226px;flex-shrink:0;}
+.tutorial-pair .demo-lane {height:113px;}
+.tutorial-pair .tutorial-art {width:320px;max-width:none;transform:scale(.78);transform-origin:top center;}
+.tutorial-pair .demo-lane:last-child .demo-frame {left:25%;}
+.tutorial-pair .demo-lane:last-child .demo-parcel {animation-name:demo-deliver-lower;}
+.tutorial-pair .demo-lane:last-child .demo-hand {left:168px;}
+.tutorial-pair .demo-lane:last-child .demo-spark {left:164px;}
+@keyframes demo-deliver-lower {
+ 0%,10% {transform:translateX(0);opacity:1;}
+ 50%,65% {transform:translateX(84px);opacity:1;}
+ 80%,100% {transform:translate(84px,52px) scale(.35);opacity:0;}
+}
+
+@media(min-width:581px) and (max-height:650px){
+ .two-lanes .overlay:has(.tutorial-pair) {gap:4px;}
+ .two-lanes .overlay:has(.tutorial-pair) h2 {font-size:24px;}
+ .two-lanes .tutorial-pair {height:160px;}
+ .two-lanes .tutorial-pair .demo-lane {height:80px;}
+ .two-lanes .tutorial-pair .tutorial-art {transform:scale(.55);}
+ .two-lanes .overlay:has(.tutorial-pair) .practice-dots {font-size:26px;margin:4px;}
 }

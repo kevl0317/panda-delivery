@@ -1,10 +1,44 @@
 const E=PandaEngine, C=GAME_CONTENT, $=s=>document.querySelector(s);
 let save={best:{},sound:true};try{save={...save,...JSON.parse(localStorage.getItem('panda-post-v1')||'{}')};}catch{}
-let chapter=0,state=null,raf=0,audioContext=null;
+let chapter=0,state=null,raf=0,audioContext=null,audioWake=null;
 const persist=()=>{try{localStorage.setItem('panda-post-v1',JSON.stringify(save));}catch{}};
 const unlocked=()=>Math.min(25,Math.max(0,...Object.keys(save.best).map(Number))+1);
-function beep(ok){if(!save.sound)return;try{audioContext??=new (window.AudioContext||window.webkitAudioContext)();const o=audioContext.createOscillator(),g=audioContext.createGain();o.connect(g);g.connect(audioContext.destination);o.frequency.value=ok?660:190;g.gain.setValueAtTime(.055,audioContext.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioContext.currentTime+.15);o.start();o.stop(audioContext.currentTime+.16);}catch{}}
-function showModal(html){$('#modalContent').innerHTML=html;if(!$('#modal').open)$('#modal').showModal();}
+// Start the output path during the opening gesture, before a delivery tone.
+async function ensureAudio(){
+ if(!save.sound)return null;
+ try{
+  if(!audioContext||audioContext.state==='closed')audioContext=new (window.AudioContext||window.webkitAudioContext)();
+  const context=audioContext;
+  if(!audioWake||audioWake.context!==context||(!audioWake.pending&&context.state!=='running')){
+   const wake={context,pending:true,promise:null};audioWake=wake;
+   wake.promise=(async()=>{
+    if(context.state!=='running')await context.resume();
+    if(context.state!=='running')return null;
+    // A short silent buffer wakes the audio device without an extra sound.
+    await new Promise(resolve=>{
+     const source=context.createBufferSource();
+     source.buffer=context.createBuffer(1,Math.ceil(context.sampleRate*.06),context.sampleRate);
+     source.connect(context.destination);source.onended=()=>{source.disconnect();resolve();};source.start();
+    });
+    return context;
+   })().catch(()=>null).finally(()=>{wake.pending=false;});
+  }
+  const contextReady=await audioWake.promise;
+  return contextReady?.state==='running'?contextReady:null;
+ }catch{return null;}
+}
+async function beep(ok){
+ const context=await ensureAudio();
+ if(!context||!save.sound)return;
+ try{
+  const o=context.createOscillator(),g=context.createGain(),start=context.currentTime+.015;
+  o.connect(g);g.connect(context.destination);o.frequency.value=ok?660:190;
+  g.gain.setValueAtTime(.001,start);g.gain.linearRampToValueAtTime(.09,start+.015);
+  g.gain.exponentialRampToValueAtTime(.001,start+.24);
+  o.onended=()=>{o.disconnect();g.disconnect();};o.start(start);o.stop(start+.26);
+ }catch{}
+}
+function showModal(html){const modal=$('#modal');$('#modalContent').innerHTML=html;const heading=$('#modalContent h2');if(heading){heading.id='modalTitle';modal.setAttribute('aria-labelledby',heading.id);}else{modal.removeAttribute('aria-labelledby');}if(!modal.open)modal.showModal();}
 function zoomCity(level){
  const viewer=document.createElement('dialog');viewer.className='city-viewer';viewer.setAttribute('aria-label',E.cities[level-1]+' · '+CITY_FEATURES[level-1]);
  viewer.innerHTML=`<button class="secondary city-viewer-close" autofocus>× 关闭</button>${cityTile(level)}<div class="city-viewer-caption">${E.cities[level-1]} · ${CITY_FEATURES[level-1]}</div>`;
@@ -13,61 +47,152 @@ function zoomCity(level){
  viewer.addEventListener('close',()=>viewer.remove());viewer.showModal();
 }
 function closeModal(){$('#modal').close();}
-function art(){return '<img class="courier-art" src="assets/panda.png" alt="熊猫快递员">';}
+function art(){return '<button type="button" class="courier-button" id="courierBtn" aria-label="和熊猫打招呼"><span class="courier-reaction"><img class="courier-art" src="assets/panda.png" alt="" draggable="false"></span></button>';}
+function greetCourier(){
+ const reaction=$('#courierBtn .courier-reaction');
+ reaction.getAnimations().forEach(animation=>animation.cancel());
+ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ reaction.animate(reduced?[
+  {filter:'brightness(1.14)'},{filter:'brightness(1.14)'}
+ ]:[
+  {transform:'translateY(0) scale(1)'},
+  {transform:'translateY(3px) scale(.97)',offset:.18},
+  {transform:'translateY(-18px) scale(.98)',offset:.48},
+  {transform:'translateY(0) scale(.99)',offset:.76},
+  {transform:'translateY(-4px) scale(1)',offset:.88},
+  {transform:'translateY(0) scale(1)'}
+ ],{duration:reduced?320:620,easing:'ease-in-out'});
+}
 function home(){cancelAnimationFrame(raf);state=null;closeModal();const next=unlocked();chapter=Math.floor((next-1)/5);renderHome();}
 function renderHome(){const next=unlocked(),done=Object.keys(save.best).length;
- $('#main').innerHTML=`<section class="hero"><div><div class="eyebrow">成都始发 · 公路快线</div><h1>熊猫<em>快递局</em></h1><p>下一站，送达美好。</p><div class="actions"><button class="primary" id="continueBtn">${done?'继续旅程':'开始第一站'} <span>→</span></button></div></div>${art()}</section><div class="section-top"><h2>快递旅程</h2><span>★ ${Object.values(save.best).reduce((n,x)=>n+x.stars,0)} / 75</span></div><div class="chapters">${['熊猫出川','一路向东','北上北京','南下广州','开往春城'].map((x,i)=>`<button class="chapter ${i===chapter?'selected':''}" data-chapter="${i}">0${i+1} ${x}</button>`).join('')}</div><div class="level-grid">${C.slice(chapter*5,chapter*5+5).map(x=>stationCard(x,next)).join('')}</div>`;
- $('#continueBtn').onclick=()=>prepare(next);
+ $('#main').innerHTML=`<section class="hero"><div><h1>熊猫<em>快递局</em></h1><div class="actions"><button class="primary" id="continueBtn">${done?'继续旅程':'出发'} <span>→</span></button>${save.best[25]?'<button class="secondary" id="journeyMemory">旅程纪念册</button>':''}</div></div>${art()}</section><div class="section-top"><h2>快递旅程</h2><div class="journey-counts"><span>已抵达 <b>${done}</b> / 25 站</span><span>★ ${Object.values(save.best).reduce((n,x)=>n+x.stars,0)} / 75</span></div></div><div class="chapters" role="group" aria-label="选择旅程章节">${['熊猫出川','一路向东','北上北京','南下广州','开往春城'].map((x,i)=>`<button class="chapter ${i===chapter?'selected':''}" data-chapter="${i}" aria-pressed="${i===chapter}">0${i+1} ${x}</button>`).join('')}</div><div class="level-grid">${C.slice(chapter*5,chapter*5+5).map(x=>stationCard(x,next)).join('')}</div>`;
+ $('#continueBtn').onclick=()=>prepare(next);if($('#journeyMemory'))$('#journeyMemory').onclick=showJourney;
+ $('#courierBtn').onclick=greetCourier;
  document.querySelectorAll('[data-chapter]').forEach(b=>b.onclick=()=>{chapter=+b.dataset.chapter;renderHome();});
  document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>prepare(+b.dataset.level));
 }
-function prepare(level,practiceOnly=false){cancelAnimationFrame(raf);closeModal();const basketKinds=E.kinds(level).slice();for(let i=basketKinds.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[basketKinds[i],basketKinds[j]]=[basketKinds[j],basketKinds[i]];}state={level,practiceOnly,basketKinds,mode:'ready',index:0,correct:0,passed:0,missed:0,wrong:0,elapsed:0,seq:E.sequence(level),phase:0,last:0,paused:false,practiceIndex:0};renderGame();
- overlay(`<div class="eyebrow">第 ${level} 站 · ${E.cities[level-1]}</div><h2>对上图案，入框就点</h2>${tutorialArt(level)}<div class="actions"><button class="primary" id="startPractice">${level<=3||practiceOnly?'试一试':'练习'}</button>${level>3&&!practiceOnly?'<button class="secondary" id="startOfficial">出发 →</button>':''}</div><button class="quiet rule-detail" id="ruleDetail">规则 ⓘ</button>`);
- $('#ruleDetail').onclick=()=>showModal(`<h2>本关规则</h2><p>${C[level-1].rule}</p><p>快递中心进入对应篮框时点击。框外点击无效。</p><button class="primary" onclick="closeModal()">知道了</button>`);
+function prepare(level,practiceOnly=false){
+ cancelAnimationFrame(raf);closeModal();
+ const basketRows=E.baskets(level);
+ state={level,practiceOnly,basketRows,basketKinds:basketRows[0],mode:'ready',index:0,nextIndex:0,correct:0,passed:0,missed:0,wrong:0,elapsed:0,roundElapsed:0,seq:E.sequence(level,basketRows),parcels:[],last:0,paused:false,practiceIndex:0};renderGame();
+ overlay(`<div class="eyebrow">第 ${level} 站 · ${E.cities[level-1]}</div><h2>${E.config(level).simultaneous?'上下同时来，分别点快递':'入框就点'}</h2>${tutorialArt(level)}<div class="actions"><button class="${level<=3||practiceOnly?'primary':'secondary'}" id="startPractice">${level<=3||practiceOnly?'试一试':'练习'}</button>${level>3&&!practiceOnly?'<button class="primary" id="startOfficial">出发 →</button>':''}</div><button class="quiet rule-detail" id="ruleDetail">规则 ⓘ</button>`);
+ $('#ruleDetail').onclick=()=>showModal(`<div class="eyebrow">第 ${level} 站 · ${E.cities[level-1]}</div><h2>本关规则</h2><p>${C[level-1].rule}</p><p>${C[level-1].detail}</p><p class="modal-note">通关目标：${C[level-1].threshold}。<br>练习不计入正式成绩，通关后收藏本关知识卡。</p><button class="primary" onclick="closeModal()">知道了</button>`);
  $('#startPractice').onclick=practiceStart;if($('#startOfficial'))$('#startOfficial').onclick=countdown;
 }
-function dual(){return [16,17,20,22,25].includes(state.level);}
+function dual(){return E.config(state.level).lanes===2;}
 function symbol(k){return k.replace('蓝色','').replace('橙色','').replace('黄色','').replace('紫色','').replace('双竹叶','竹竹').replace('单竹叶','竹').replace('竹叶','竹').replace('花朵','✿').replace('双圆点','••').replace('单圆点','•').replace('三圆点','•••').replace('圆点','•').replace('实心星形','★').replace('空心星形','☆').replace('实心圆形','●').replace('圆形','●').replace('方形','■').replace('三角形','▲').replace('星形','★').replace('向右','→').replace('向左','←').replace('向上','↑').replace('向下','↓')||'●';}
 function color(k){return k.includes('蓝')?'blue':k.includes('橙')?'orange':k.includes('紫')?'purple':k.includes('黄')?'yellow':'';}
 function renderGame(){const {level}=state;
- $('#main').innerHTML=`<div class="game-heading"><div><span class="eyebrow">${C[level-1].chapter} / ${level<6?'G42':level<11?'G42':level<16?'G2':level<21?'G4':'G80'}</span><h1>第 ${String(level).padStart(2,'0')} 站 · ${E.cities[level-1]}</h1></div><div class="game-tools"><button class="primary back-home" id="backHomeBtn">← 返回首页</button><button class="quiet" id="retryBtn">重来</button><button class="secondary" id="pauseBtn">暂停</button></div></div><div class="stats"><div class="stat">已处理<strong id="processed">0 / ${E.ROUND.total}</strong></div><div class="stat">入篮<strong id="correct">0</strong></div><div class="stat">◷<strong id="timeLeft">—</strong></div><div class="progress-track"><i id="progress" style="width:0"></i></div></div><section class="warehouse ${dual()?'two-lanes':''}" id="warehouse"><div class="warehouse-top"><span>➜</span><span id="laneHint">传送方向 →</span></div><div id="lanes"></div><div class="game-bottom"><div id="feedback" class="feedback" aria-live="polite">入框，再点。</div><button class="spacekey" id="deliverBtn" aria-label="投递当前快递">投递 <small>空格</small></button></div></section>`;
- $('#backHomeBtn').onclick=()=>confirmLeave(home,'返回旅程首页？');$('#retryBtn').onclick=()=>confirmLeave(()=>prepare(level,state.practiceOnly),'重新开始本关？');$('#pauseBtn').onclick=togglePause;$('#deliverBtn').onclick=()=>投递();renderLanes();
+ $('#main').innerHTML=`<div class="game-heading"><div><h1>第 ${String(level).padStart(2,'0')} 站 · <span class="game-city">${annotatePinyin(E.cities[level-1])}</span></h1></div><div class="game-tools"><button class="primary back-home" id="backHomeBtn">← 返回首页</button><button class="quiet" id="retryBtn">重来</button><button class="secondary" id="pauseBtn">暂停</button></div></div><div class="stats"><div class="stat">已处理<strong id="processed">0 / ${E.round(state.level).total}</strong></div><div class="stat">入篮<strong id="correct">0</strong></div><div class="stat">◷<strong id="timeLeft">—</strong></div><div class="progress-track"><i id="progress" style="width:0"></i></div></div><section class="warehouse ${dual()?'two-lanes':''}" id="warehouse"><div id="lanes"></div><div class="game-bottom"><div id="feedback" class="feedback" aria-live="polite"></div></div></section>`;
+ $('#backHomeBtn').onclick=()=>confirmLeave(home,'返回旅程首页？');$('#retryBtn').onclick=()=>confirmLeave(()=>prepare(level,state.practiceOnly),'重新开始本关？');$('#pauseBtn').onclick=togglePause;renderLanes();
 }
-function renderLanes(){const ks=state.basketKinds;$('#lanes').innerHTML=Array.from({length:dual()?2:1},(_,lane)=>`<div class="lane" id="lane${lane}"><span class="lane-name">${dual()?lane?'右线':'左线':'分拣传送带'}</span><div class="belt"></div>${ks.map((k,i)=>`<div class="basket" data-lane="${lane}" data-basket="${i}" style="left:${[25,52,79][i]}%"><div class="basket-body"><img src="assets/basket.png" alt=""><span title="${k}">${itemIcon(k)}</span></div></div>`).join('')}<button class="parcel done" id="parcel${lane}" aria-label="点击投放快递"></button></div>`).join('');document.querySelectorAll('.parcel').forEach(p=>p.onclick=()=>投递());}
+function renderLanes(){
+ $('#lanes').innerHTML=state.basketRows.map((ks,lane)=>`<div class="lane" id="lane${lane}">${dual()?`<span class="lane-name">${lane?'下线':'上线'}</span>`:''}<div class="belt"></div>${ks.map((k,i)=>`<div class="basket" data-lane="${lane}" data-basket="${i}" style="left:${[25,52,79][i]}%"><div class="basket-body"><img src="assets/basket.png" alt="" draggable="false"><span title="${k}">${itemIcon(k)}</span></div></div>`).join('')}<button class="parcel done" id="parcel${lane}" data-lane="${lane}" aria-label="点击投放快递"></button></div>`).join('');
+ document.querySelectorAll('.parcel').forEach(p=>p.onclick=()=>投递(+p.dataset.lane));
+}
 function overlay(html){$('#warehouse .overlay')?.remove();const d=document.createElement('div');d.className='overlay';d.innerHTML=html;$('#warehouse').append(d);}
 function removeOverlay(){$('#warehouse .overlay')?.remove();}
-function practiceStart(){state.mode='practice';state.practiceIndex=0;state.correct=0;state.passed=0;state.missed=0;state.wrong=0;state.phase=0;renderLanes();removeOverlay();nextPractice();state.last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);}
-function nextPractice(){const kind=E.kinds(state.level)[state.practiceIndex];state.current={kind,lane:0,active:0,stamp:false,yes:true,phase:0};state.elapsed=0;state.resolved=false;mountParcel();feedback(`${state.practiceIndex+1} / 3 · 入框就点`);}
-function countdown(){state.mode='countdown';state.count=3;state.elapsed=0;state.phase=0;renderLanes();overlay('<span class="eyebrow">准备发车</span><div class="count">3</div>');state.last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);}
-function officialStart(){state.mode='playing';state.index=0;state.correct=0;state.passed=0;state.missed=0;state.wrong=0;state.elapsed=0;state.phase=0;state.seq=E.sequence(state.level);removeOverlay();mountCurrent();}
-function mountCurrent(){state.current=state.seq[state.index];state.elapsed=0;state.resolved=false;if(state.phase!==state.current.phase){state.phase=state.current.phase;renderLanes();}mountParcel();}
-function mountParcel(){document.querySelectorAll('.parcel').forEach(p=>p.classList.add('done'));const c=state.current,p=$('#parcel'+c.lane);p.innerHTML=`<div class="box"><img src="assets/parcel.png" alt=""><span class="label" title="${c.kind}">${itemIcon(c.kind)}</span>${c.stamp?'<i class="stamp">×</i>':''}</div>`;p.style.left='5%';p.classList.remove('done');p.setAttribute('aria-label',c.kind+(c.stamp?'，不合格':'')+'快递，点击投放');updateStats();}
-function travel(){const duration=state.mode==='practice'?6.5:E.duration(state.level,state.index);return {duration,x:E.position(state.elapsed,duration)};}
-function 投递(){if(!state||!['practice','playing'].includes(state.mode)||state.paused||state.resolved||$('#modal').open)return;const {duration,x}=travel();const b=E.hit(x);if(state.elapsed>=duration-.25||b<0){feedback('等入框',true);return;}const c=state.current,ok=state.basketKinds[b]===c.kind;state.resolved=true;state.resolvedAt=state.elapsed;const parcel=$('#parcel'+c.lane),ghost=parcel.cloneNode(true);ghost.removeAttribute('id');ghost.disabled=true;ghost.style.left=x*100+'%';ghost.style.pointerEvents='none';parcel.parentNode.append(ghost);ghost.animate(ok?[{transform:'translateX(-50%)',opacity:1},{transform:'translate(-50%, 65px) scale(.5)',opacity:0}]:[{transform:'translateX(-50%)',opacity:1},{transform:'translate(-50%, -35px) rotate(15deg)',opacity:0}],{duration:330,easing:'ease-in',fill:'forwards'}).onfinish=()=>ghost.remove();parcel.classList.add('done');
- if(ok){state.correct++;feedback('✓ 送达！');beep(true);}else{state.wrong++;feedback('篮子不对',true);beep(false);}state.practiceOk=ok;updateStats();}
-function feedback(text,bad=false){$('#feedback').textContent=text;$('#feedback').className='feedback'+(bad?' bad':'');}
-function endParcel(){if(!state.resolved){state.missed++;feedback('错过啦',true);state.practiceOk=false;}if(state.mode==='practice'){
-   const ok=state.practiceOk;if(ok)state.practiceIndex++;
-   state.mode='practiceWait';overlay(`<h2>${ok?'✓ 漂亮！':'再试一次'}</h2><div class="practice-dots">${'●'.repeat(state.practiceIndex)+'○'.repeat(3-state.practiceIndex)}</div>${ok?'':tutorialArt(state.level)}<button class="primary" id="practiceNext">${ok&&state.practiceIndex===3?state.practiceOnly?'再练一次':'正式出发':'继续练习'}</button>${ok&&state.practiceIndex===3?'<button class="quiet" id="practiceHome">返回首页</button>':''}`);
-   $('#practiceNext').onclick=()=>{if(state.practiceIndex===3){state.practiceOnly?practiceStart():countdown();}else{state.mode='practice';removeOverlay();nextPractice();state.last=performance.now();raf=requestAnimationFrame(tick);}};if($('#practiceHome'))$('#practiceHome').onclick=home;return;
- }
- state.index++;updateStats();if(state.index===E.ROUND.total){finish();return;}mountCurrent();}
-function updateStats(){if(!state)return;$('#processed').textContent=state.mode==='practice'?`${state.practiceIndex} / 3`:`${state.index} / ${E.ROUND.total}`;$('#correct').textContent=state.correct;$('#progress').style.width=state.index/E.ROUND.total*100+'%';if(state.mode==='practice')$('#timeLeft').textContent='慢速';else{let seconds=0;for(let i=state.index;i<E.ROUND.total;i++)seconds+=E.duration(state.level,i);$('#timeLeft').textContent=Math.max(0,Math.ceil(seconds-state.elapsed))+' 秒';}}
-function tick(now){if(!state)return;const dt=Math.min((now-state.last)/1000,.08);state.last=now;if(state.paused){raf=requestAnimationFrame(tick);return;}
- if(state.mode==='countdown'||state.mode==='switch'){state.elapsed+=dt;const n=3-Math.floor(state.elapsed);if(n>0){$('.count').textContent=n;}else if(state.mode==='countdown')officialStart();else{state.mode='playing';removeOverlay();mountCurrent();}}
- else if(['playing','practice'].includes(state.mode)){state.elapsed+=dt;const {duration,x}=travel();const p=$('#parcel'+state.current.lane);p.style.left=x*100+'%';document.querySelectorAll('.basket').forEach(b=>b.classList.toggle('active',!state.resolved&&+b.dataset.lane===state.current.lane&&E.hit(x)===+b.dataset.basket&&state.elapsed<duration-.25));updateStats();if(state.elapsed>=duration||(state.resolved&&state.elapsed-state.resolvedAt>=.35))endParcel();}
- if(state&&['playing','practice','countdown','switch'].includes(state.mode))raf=requestAnimationFrame(tick);
+function practiceStart(){
+ state.mode='practice';state.practiceIndex=0;state.correct=0;state.passed=0;state.missed=0;state.wrong=0;
+ renderLanes();removeOverlay();nextPractice();state.last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);
 }
-function togglePause(){if(!state||!['playing','practice','countdown','switch'].includes(state.mode))return;if(!state.paused){state.paused=true;showModal('<div class="eyebrow">休息一下</div><h2>分拣已暂停</h2><img class="pause-panda" src="assets/panda.png" alt="休息中的熊猫快递员"><div class="modal-actions"><button class="primary" id="resume">继续分拣</button><button class="secondary" id="pauseHome">返回首页</button></div>');$('#resume').onclick=()=>{closeModal();state.paused=false;state.last=performance.now();};$('#pauseHome').onclick=home;}}
-function confirmLeave(action,title){if(!state||['ready','result','practiceWait'].includes(state.mode)){action();return;}state.paused=true;showModal(`<h2>${title}</h2><p>本局将重新开始，旅程进度保留。</p><div class="modal-actions"><button class="primary" id="confirm">确定</button><button class="secondary" id="cancel">继续当前游戏</button></div>`);$('#confirm').onclick=()=>{closeModal();action();};$('#cancel').onclick=()=>{closeModal();state.paused=false;state.last=performance.now();};}
-function finish(){state.mode='result';cancelAnimationFrame(raf);const {level,correct,passed,missed,wrong}=state,r=E.result(level,correct,passed);if(r.win){const old=save.best[level];if(!old||r.score>old.score)save.best[level]={stars:r.stars,score:r.score};persist();}
- showModal(`<div class="eyebrow">${E.cities[level-1]} · 本次分拣完成</div><div class="result-stars">${'★'.repeat(r.stars)+'☆'.repeat(3-r.stars)}</div><h2 class="result-title" tabindex="-1" autofocus>${r.win?level===25?'全程送达，辛苦啦！':'顺利送达！':'再接再厉！'}</h2><div class="result-metrics"><div>投递精准度<strong>${r.score}<small> 分</small></strong></div><div>正确投递率<strong>${(r.target*100).toFixed(1)}%</strong></div><div>正确入篮<strong>${correct} / ${E.ROUND.total}</strong></div></div><details class="score-details"><summary>成绩详情</summary><p>正确入篮 ${correct} / ${E.ROUND.targets} · 漏投 ${missed}<br>投错 ${wrong}<br>${C[level-1].threshold}</p></details>${r.win&&level%5===0?`<div class="chapter-seal">✦ 已获得 ${['三峡','上海天际线','祈年殿','广州塔','斗南鲜花'][level/5-1]}纪念章<br><small>${C[level-1].chapter} · 线路已完成</small></div>`:''}<article class="knowledge-card result-knowledge panda-knowledge"><img class="knowledge-panda" src="assets/panda.png" alt="熊猫快递员正在讲解"><div class="knowledge-bubble"><span class="eyebrow">熊猫讲给你听 · ${C[level-1].knowledgeTitle || E.cities[level-1]}</span><button class="knowledge-zoom" aria-label="放大${E.cities[level-1]}图片" onclick="zoomCity(${level})">${cityTile(level)}<span aria-hidden="true">⤢</span></button><p>${C[level-1].knowledge}</p></div></article><div class="modal-actions">${r.win&&level<25?'<button class="primary" id="nextLevel">前往下一站 →</button>':''}<button class="${r.win?'secondary':'primary'}" id="replay">再试一次</button><button class="secondary" id="resultHome">返回首页</button></div>`);
- if($('#nextLevel'))$('#nextLevel').onclick=()=>prepare(level+1);$('#replay').onclick=()=>prepare(level);$('#resultHome').onclick=home;
+function createParcel(item,sequenceIndex){return {...item,sequenceIndex,elapsed:0,resolved:false,ended:false,practiceOk:false};}
+function nextPractice(){
+ const kinds=E.kinds(state.level),pair=E.config(state.level).simultaneous;
+ const upperKind=kinds[state.practiceIndex%3],upperColumn=state.basketRows[0].indexOf(upperKind);
+ state.parcels=Array.from({length:pair?2:1},(_,i)=>createParcel({kind:i?state.basketRows[1][(upperColumn+1)%3]:upperKind,lane:pair?i:dual()?state.practiceIndex%2:0},i));
+ hideParcels();state.parcels.forEach(mountParcel);feedback(`练习 ${state.practiceIndex+1} / 3`);updateStats();
+}
+function countdown(){state.mode='countdown';state.elapsed=0;state.parcels=[];renderLanes();overlay('<span class="eyebrow">准备发车</span><div class="count">3</div>');state.last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);}
+function officialStart(){state.mode='playing';state.roundElapsed=0;state.index=0;state.nextIndex=0;state.correct=0;state.passed=0;state.missed=0;state.wrong=0;state.seq=E.sequence(state.level,state.basketRows);state.last=performance.now();removeOverlay();mountCurrent();}
+function hideParcels(){document.querySelectorAll('.parcel').forEach(p=>{if(!p.id)p.remove();else p.classList.add('done');});document.querySelectorAll('.basket.active').forEach(b=>b.classList.remove('active'));}
+function mountCurrent(){
+ const amount=E.config(state.level).simultaneous?2:1;
+ const start=state.nextIndex;
+ state.parcels=state.seq.slice(start,start+amount).map((item,i)=>createParcel(item,start+i));
+ state.nextIndex+=state.parcels.length;hideParcels();state.parcels.forEach(mountParcel);updateStats();
+}
+function mountParcel(c){
+ const p=$('#parcel'+c.lane);p.innerHTML=`<div class="box"><img src="assets/parcel.png" alt="" draggable="false"><span class="label" title="${c.kind}">${itemIcon(c.kind)}</span></div>`;
+ p.style.left='5%';p.classList.remove('done');p.setAttribute('aria-label',`${dual()?c.lane?'下线，':'上线，':''}${c.kind}快递，点击投放`);
+}
+function travel(c){const duration=state.mode==='practice'?6.5:E.duration(state.level,c.sequenceIndex);return {duration,x:E.position(c.elapsed,duration)};}
+function 投递(lane){
+ if(!state||!['practice','playing'].includes(state.mode)||state.paused||$('#modal').open)return;
+ const c=state.parcels.find(p=>p.lane===lane&&!p.ended);if(!c||c.resolved)return;
+ const {duration,x}=travel(c),basket=E.hit(x);
+ if(c.elapsed>=duration-.25||basket<0){feedback('等入框',true);return;}
+ const ok=state.basketRows[lane][basket]===c.kind;
+ c.resolved=true;c.resolvedAt=c.elapsed;c.practiceOk=ok;
+ const parcel=$('#parcel'+lane),ghost=parcel.cloneNode(true);ghost.removeAttribute('id');ghost.disabled=true;ghost.style.left=x*100+'%';ghost.style.pointerEvents='none';parcel.parentNode.append(ghost);
+ ghost.animate(ok?[{transform:'translateX(-50%)',opacity:1},{transform:'translate(-50%, 65px) scale(.5)',opacity:0}]:[{transform:'translateX(-50%)',opacity:1},{transform:'translate(-50%, -35px) rotate(15deg)',opacity:0}],{duration:330,easing:'ease-in',fill:'forwards'}).onfinish=()=>ghost.remove();parcel.classList.add('done');
+ if(ok){state.correct++;feedback('✓ 送达！');beep(true);}else{state.wrong++;feedback('篮子不对',true);beep(false);}updateStats();
+}
+function feedback(text,bad=false){$('#feedback').textContent=text;$('#feedback').className='feedback'+(bad?' bad':'');}
+function endParcel(c){
+ if(!state||!['playing','practice'].includes(state.mode)||!state.parcels.includes(c)||c.ended)return;
+ c.ended=true;$('#parcel'+c.lane).classList.add('done');
+ if(!c.resolved){state.missed++;feedback('错过啦',true);c.practiceOk=false;}
+ if(state.mode==='practice'){
+  if(!state.parcels.every(p=>p.ended))return;
+  const ok=state.parcels.every(p=>p.practiceOk);if(ok)state.practiceIndex++;
+  state.mode='practiceWait';overlay(`<h2>${ok?'✓ 漂亮！':'再试一次'}</h2><div class="practice-dots">${'●'.repeat(state.practiceIndex)+'○'.repeat(3-state.practiceIndex)}</div>${ok?'':tutorialArt(state.level)}<button class="primary" id="practiceNext">${ok&&state.practiceIndex===3?state.practiceOnly?'再练一次':'正式出发':'继续练习'}</button>${ok&&state.practiceIndex===3?'<button class="quiet" id="practiceHome">返回首页</button>':''}`);
+  $('#practiceNext').onclick=()=>{if(state.practiceIndex===3){state.practiceOnly?practiceStart():countdown();}else{state.mode='practice';removeOverlay();nextPractice();state.last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(tick);}};if($('#practiceHome'))$('#practiceHome').onclick=home;return;
+ }
+ state.index++;updateStats();if(state.index===E.round(state.level).total){finish();return;}
+ if(state.parcels.every(p=>p.ended))mountCurrent();
+}
+function updateStats(){
+ if(!state)return;const total=E.round(state.level).total;
+ $('#processed').textContent=state.mode==='practice'?`${state.practiceIndex} / 3`:`${state.index} / ${total}`;
+ $('#correct').textContent=state.correct;$('#progress').style.width=state.index/total*100+'%';
+ $('#timeLeft').textContent=state.mode==='practice'?'慢速':Math.max(0,Math.ceil(E.round(state.level).seconds-state.roundElapsed))+' 秒';
+}
+function tick(now){
+ if(!state)return;const frameSeconds=Math.max(0,(now-state.last)/1000),dt=Math.min(frameSeconds,.08);state.last=now;
+ if(state.paused){raf=requestAnimationFrame(tick);return;}
+ if(state.mode==='countdown'){state.elapsed+=dt;const n=3-Math.floor(state.elapsed);if(n>0)$('.count').textContent=n;else officialStart();}
+ else if(['playing','practice'].includes(state.mode)){
+  const round=E.round(state.level);
+  if(state.mode==='playing'){
+   state.roundElapsed+=frameSeconds;
+   if(state.roundElapsed>=round.seconds){state.roundElapsed=round.seconds;state.missed=round.total-state.correct-state.wrong;state.index=round.total;state.parcels.forEach(c=>c.ended=true);hideParcels();updateStats();finish();return;}
+  }
+  // Snapshot: finishing the second lane may create a new wave during this loop.
+  for(const c of state.parcels.slice()){
+   if(c.ended)continue;c.elapsed+=dt;
+   const {duration,x}=travel(c);$('#parcel'+c.lane).style.left=x*100+'%';
+   document.querySelectorAll(`.basket[data-lane="${c.lane}"]`).forEach(b=>b.classList.toggle('active',!c.resolved&&E.hit(x)===+b.dataset.basket&&c.elapsed<duration-.25));
+   if(c.elapsed>=duration||(c.resolved&&c.elapsed-c.resolvedAt>=round.settle))endParcel(c);
+  }
+  updateStats();
+ }
+ if(state&&['playing','practice','countdown'].includes(state.mode))raf=requestAnimationFrame(tick);
+}
+function togglePause(){if(!state||!['playing','practice','countdown'].includes(state.mode))return;if(!state.paused){state.paused=true;showModal('<h2>已暂停</h2><img class="pause-panda" src="assets/panda.png" alt="休息中的熊猫快递员"><div class="modal-actions"><button class="primary" id="resume">继续</button><button class="secondary" id="pauseHome">返回首页</button></div>');$('#resume').onclick=()=>{closeModal();state.paused=false;state.last=performance.now();};$('#pauseHome').onclick=home;}}
+function confirmLeave(action,title){if(!state||['ready','result','practiceWait'].includes(state.mode)){action();return;}state.paused=true;showModal(`<h2>${title}</h2><p>本局进度将重置。</p><div class="modal-actions"><button class="primary" id="confirm">确定</button><button class="secondary" id="cancel">继续游戏</button></div>`);$('#confirm').onclick=()=>{closeModal();action();};$('#cancel').onclick=()=>{closeModal();state.paused=false;state.last=performance.now();};}
+// Only annotate the two characters requested by the player. Each surface
+// owns its seen set, so the game heading cannot consume a card annotation.
+function annotatePinyin(text,seen=new Set()){
+ const readings={'沂':'yí','肇':'zhào'};
+ return Array.from(text).map(ch=>{const safe=ch.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');if(!readings[ch]||seen.has(ch))return safe;seen.add(ch);return `<ruby>${safe}<rp>（</rp><rt><span class="pinyin-reading">${readings[ch]}</span></rt><rp>）</rp></ruby>`;}).join('');
+}
+function knowledgeReading(card){
+ const seen=new Set();
+ return {title:annotatePinyin(card.knowledgeTitle||E.cities[card.id-1],seen),body:annotatePinyin(card.knowledge,seen)};
+}
+function finish(){state.mode='result';cancelAnimationFrame(raf);const {level,correct,passed,missed,wrong}=state,r=E.result(level,correct,passed),reading=knowledgeReading(C[level-1]);if(r.win){const old=save.best[level];if(!old||r.score>old.score)save.best[level]={stars:r.stars,score:r.score};persist();}
+ showModal(`<div class="eyebrow">${E.cities[level-1]}</div><div class="result-stars">${'★'.repeat(r.stars)+'☆'.repeat(3-r.stars)}</div><h2 class="result-title" tabindex="-1" autofocus>${r.win?level===25?'全程送达！':'顺利送达！':'再接再厉！'}</h2><div class="result-metrics"><div>得分<strong>${r.score}</strong></div></div><details class="score-details"><summary>成绩详情</summary><p>送达 ${correct} / ${E.round(state.level).total} · 漏投 ${missed} · 投错 ${wrong}</p></details>${r.win&&level%5===0?`<div class="chapter-seal">✦ ${['三峡','上海天际线','祈年殿','广州塔','斗南鲜花'][level/5-1]}纪念章</div>`:''}<article class="knowledge-card result-knowledge panda-knowledge"><img class="knowledge-panda" src="assets/panda.png" alt="熊猫快递员正在讲解"><div class="knowledge-bubble"><span class="eyebrow">熊猫讲给你听 · ${reading.title}</span><button class="knowledge-zoom" aria-label="放大${E.cities[level-1]}图片" onclick="zoomCity(${level})">${cityTile(level)}<span aria-hidden="true">⤢</span></button><p>${reading.body}</p></div></article><div class="modal-actions">${r.win&&level<25?'<button class="primary" id="nextLevel">下一站 →</button>':''}${r.win&&level===25?'<button class="primary" id="journeyEnd">展开旅程地图 →</button>':''}<button class="${r.win?'secondary':'primary'}" id="replay">再试一次</button><button class="secondary" id="resultHome">返回首页</button></div>`);
+ if($('#journeyEnd'))$('#journeyEnd').onclick=showJourney;if($('#nextLevel'))$('#nextLevel').onclick=()=>prepare(level+1);$('#replay').onclick=()=>prepare(level);$('#resultHome').onclick=home;
 }
 $('#homeBtn').onclick=()=>confirmLeave(home,'返回旅程首页？');
-$('#collectionBtn').onclick=()=>{if(state&&state.mode!=='result'&&state.mode!=='ready'){togglePause();return;}showModal(`<div class="eyebrow">沿途的见闻</div><h2>城市知识图鉴</h2><div class="collection">${C.filter(x=>save.best[x.id]).map(x=>`<article><h3>K${String(x.id).padStart(2,'0')} · ${x.knowledgeTitle || E.cities[x.id-1]}</h3><p>${x.knowledge}</p></article>`).join('')||'<p>还没有收集到知识卡。完成第一站，认识南充与嘉陵江。</p>'}</div><div class="modal-actions"><button class="primary" id="closeCollection">关闭</button></div>`);$('#closeCollection').onclick=closeModal;};
-$('#soundBtn').onclick=()=>{save.sound=!save.sound;persist();$('#soundBtn').textContent='音效 '+(save.sound?'开':'关');};$('#soundBtn').textContent='音效 '+(save.sound?'开':'关');
+$('#collectionBtn').onclick=()=>{if(state&&state.mode!=='result'&&state.mode!=='ready'){togglePause();return;}const cards=C.filter(x=>save.best[x.id]);showModal(`<h2>城市知识图鉴</h2><p class="collection-summary">已收藏 <strong>${cards.length} / 25</strong> 张</p><div class="collection">${cards.map(x=>{const reading=knowledgeReading(x);return `<article><h3>K${String(x.id).padStart(2,'0')} · ${reading.title}</h3><p>${reading.body}</p></article>`;}).join('')||'<p class="collection-empty">还没有知识卡</p>'}</div><div class="modal-actions"><button class="primary" id="closeCollection">关闭图鉴</button></div>`);$('#closeCollection').onclick=closeModal;};
+function renderSound(){const button=$('#soundBtn');button.textContent='音效 '+(save.sound?'开':'关');button.setAttribute('aria-pressed',String(!!save.sound));button.title=save.sound?'关闭音效':'开启音效';}
+$('#soundBtn').onclick=()=>{save.sound=!save.sound;persist();renderSound();if(save.sound)void ensureAudio();};renderSound();
 $('#modal').addEventListener('cancel',e=>{if(state?.paused)e.preventDefault();});
-document.addEventListener('keydown',e=>{if(e.code==='Space'&&state&&['playing','practice'].includes(state.mode)&&!$('#modal').open){e.preventDefault();if(!e.repeat)投递();}if(e.code==='Escape'&&!$('#modal').open)togglePause();});
+for(const eventName of ['pointerdown','click'])document.addEventListener(eventName,e=>{if(e.target.closest('button'))void ensureAudio();},{capture:true});
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&state&&['playing','practice'].includes(state.mode)&&!$('#modal').open){e.preventDefault();}if(e.code==='Escape'&&!$('#modal').open)togglePause();});
+// Repeated gameplay clicks must not start text selection or native image drag.
+for(const eventName of ['selectstart','dragstart'])document.addEventListener(eventName,e=>{if(e.target.closest('#warehouse,.game-heading,.stats,button'))e.preventDefault();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&state&&!state.paused)togglePause();});
 home();
