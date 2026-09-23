@@ -52,7 +52,9 @@ button:disabled,.station-stop .level:disabled {cursor:var(--cursor-arrow);}
 /* Header */
 header .brand {transition:transform .2s;}
 header .brand:hover {transform:translateY(-1px);}
-header .brand-icon {background:linear-gradient(#2d6a4c,#1c4a35);border:1px solid #efc98199;box-shadow:inset 0 1px #ffffff26,0 4px 12px #061e1640;}
+/* The logo is a parcel stamped with the panda's paw; the image carries its own tile and ring. */
+header .brand-icon {display:block;width:54px;height:54px;padding:0;border:0;border-radius:24%;background:none;object-fit:cover;box-shadow:0 5px 14px #061e1666;transition:rotate .25s cubic-bezier(.3,1.6,.5,1),scale .25s cubic-bezier(.3,1.6,.5,1);user-select:none;}
+header .brand:hover .brand-icon {rotate:-6deg;scale:1.06;}
 nav {background:linear-gradient(#1e4e39eb,#143628eb);border-color:#d8b56a66;box-shadow:0 6px 16px #06170f40;}
 
 /* Home: hero call to action */
@@ -220,6 +222,7 @@ main.th-same>*,main.th-same .hero h1,main.th-same .hero .actions,main.th-same .c
 }
 @media(max-width:580px){
  .hero .actions .primary {padding:13px 26px;font-size:17px;}
+ header .brand-icon {width:40px;height:40px;}
  .section-top {margin-top:8px;padding:12px 14px 6px;border-radius:20px 20px 0 0;}
  .section-top h2 {font-size:21px;letter-spacing:2px;}
  .journey-counts span {padding:4px 10px;font-size:12px;}
@@ -240,6 +243,7 @@ main.th-same>*,main.th-same .hero h1,main.th-same .hero .actions,main.th-same .c
  .feedback {padding-right:12px;}
 }
 @media(max-width:380px){
+ header .brand-icon {width:36px;height:36px;}
  #collectionBtn:before,#soundBtn:before {display:none;}
 }
 @media(prefers-reduced-motion:reduce){
@@ -253,3 +257,21 @@ main.th-same>*,main.th-same .hero h1,main.th-same .hero .actions,main.th-same .c
 .save-transfer p {margin:12px 0 0;font-size:14px;line-height:1.6;}
 .save-transfer #saveStatus:empty {display:none;}
 .save-transfer #saveStatus {color:#ffe296;font-weight:700;}
+
+/* Keep the reset action visually distinct from sharing a save. */
+button.clear-save-warning {background:#fff0d9;color:#8c4030;border-color:#c99672;box-shadow:0 3px 0 #856344;}
+button.clear-save-warning:hover {background:#f8dfc3;}
+#clearSaveError:empty {display:none;}
+#clearSaveError {color:#8c4030;font-weight:700;line-height:1.6;}
+
+/* Settings use the same cream card and green/gold controls as the game. */
+.settings-nav {display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}
+.settings-nav svg {width:19px;height:19px;flex:none;}
+dialog[data-settings-view] {max-width:520px;}
+dialog[data-settings-view] h2 {margin-top:0;}
+.setting-row {display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 0;border-top:1px solid #bd9b6155;border-bottom:1px solid #bd9b6155;font-weight:700;}
+.setting-row button {min-width:100px;}
+dialog .settings-note {font-size:15px;line-height:1.8;margin:22px 0;color:#4e644b;}
+#settingsNotice:empty {display:none;}
+#settingsNotice {position:fixed;z-index:50;left:50%;bottom:24px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);margin:0;padding:14px 20px;border:1px solid #dfbd77;border-radius:14px;background:#173f30;color:#fff3ce;box-shadow:0 8px 24px #10271c55;line-height:1.6;pointer-events:none;}
+@media(max-width:580px){header nav{gap:0;}header .settings-nav{gap:4px;}header .settings-nav svg{width:16px;height:16px;}}

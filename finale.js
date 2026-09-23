@@ -67,7 +67,7 @@ function journeyMap(){
  const hubs=[0,5,10,15,20,25].map(l=>{
   const [x,y,side]=P[l],i=l/5,n=l-1,name=l?E.cities[n]:'成都',text=l===0?'成都 · 出发':l===25?'昆明 · 终点':name;
   const w=[...text].reduce((sum,ch)=>sum+(ch.codePointAt(0)<0x2e80?4.5:15),0)+26,ly=side==='n'?-47:48;
-  const art=l?`<image href="assets/cities-atlas.png" x="${-(n%5*62+31)}" y="${-(Math.floor(n/5)*62+31)}" width="310" height="310" preserveAspectRatio="none" clip-path="url(#jm-hub)"/>`:`<circle class="hub-brand-bg" r="23"/><text class="hub-brand" y="9">竹</text>`;
+  const art=l?`<image href="assets/cities-atlas.png" x="${-(n%5*62+31)}" y="${-(Math.floor(n/5)*62+31)}" width="310" height="310" preserveAspectRatio="none" clip-path="url(#jm-hub)"/>`:`<image href="assets/logo.png?v=2" x="-24" y="-24" width="48" height="48" clip-path="url(#jm-hub)"/>`;
   return `<g class="map-hub" data-chapters="${l===0?0:l===25?4:`${i-1} ${i}`}"${l?` data-level="${l}"`:''} style="--route:${l?JOURNEY_CHAPTERS[i-1].color:'#1f5a3f'}" transform="translate(${x} ${y})"><title>${l?`第 ${l} 站 · ${name} · ${JOURNEY_CHAPTERS[i-1].seal}纪念章`:'成都 · 熊猫快递局出发'}</title><g class="hub-art"><circle class="hub-shadow" cy="3" r="30"/><circle class="hub-ring" r="29"/><circle class="hub-gap" r="25.5"/>${art}<circle class="hub-gold" r="23"/></g><g class="hub-label" transform="translate(0 ${ly})"><rect x="${-w/2}" y="-12.5" width="${w}" height="25" rx="12.5"/><text y="5">${text}</text></g></g>`;
  }).join('');
  // Face crop of assets/panda.png: centre (605, 350), radius 277 source pixels.

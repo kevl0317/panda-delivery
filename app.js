@@ -1,6 +1,6 @@
 const E=PandaEngine, C=GAME_CONTENT, $=s=>document.querySelector(s);
 let save={best:{},sound:true};try{save={...save,...JSON.parse(localStorage.getItem('panda-post-v1')||'{}')};}catch{}
-let chapter=0,state=null,raf=0,audioContext=null,audioWake=null;
+let chapter=0,state=null,raf=0,audioContext=null,audioWake=null,progressRevision=0;
 const persist=()=>{try{localStorage.setItem('panda-post-v1',JSON.stringify(save));}catch{}};
 const unlocked=()=>Math.min(25,Math.max(0,...Object.keys(save.best).map(Number))+1);
 // Start the output path during the opening gesture, before a delivery tone.
@@ -38,7 +38,7 @@ async function beep(ok){
   o.onended=()=>{o.disconnect();g.disconnect();};o.start(start);o.stop(start+.26);
  }catch{}
 }
-function showModal(html){const modal=$('#modal');$('#modalContent').innerHTML=html;const heading=$('#modalContent h2');if(heading){heading.id='modalTitle';modal.setAttribute('aria-labelledby',heading.id);}else{modal.removeAttribute('aria-labelledby');}if(!modal.open)modal.showModal();}
+function showModal(html){const modal=$('#modal');delete modal.dataset.settingsView;$('#modalContent').innerHTML=html;const heading=$('#modalContent h2');if(heading){heading.id='modalTitle';modal.setAttribute('aria-labelledby',heading.id);}else{modal.removeAttribute('aria-labelledby');}if(!modal.open)modal.showModal();}
 function zoomCity(level){
  const viewer=document.createElement('dialog');viewer.className='city-viewer';viewer.setAttribute('aria-label',E.cities[level-1]+' · '+CITY_FEATURES[level-1]);
  viewer.innerHTML=`<button class="secondary city-viewer-close" autofocus>× 关闭</button>${cityTile(level)}<div class="city-viewer-caption">${E.cities[level-1]} · ${CITY_FEATURES[level-1]}</div>`;
@@ -46,7 +46,7 @@ function zoomCity(level){
  viewer.addEventListener('click',e=>{if(e.target===viewer){const r=viewer.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)viewer.close();}});
  viewer.addEventListener('close',()=>viewer.remove());viewer.showModal();
 }
-function closeModal(){$('#modal').close();}
+function closeModal(){const modal=$('#modal');delete modal.dataset.settingsView;modal.close();}
 function art(){return '<button type="button" class="courier-button" id="courierBtn" aria-label="和熊猫打招呼"><span class="courier-reaction"><img class="courier-art" src="assets/panda.png" alt="" draggable="false"></span></button>';}
 function greetCourier(){
  const reaction=$('#courierBtn .courier-reaction');
@@ -65,7 +65,7 @@ function greetCourier(){
 }
 function home(){cancelAnimationFrame(raf);state=null;closeModal();const next=unlocked();chapter=Math.floor((next-1)/5);renderHome();}
 function renderHome(){const next=unlocked(),done=Object.keys(save.best).length;
- $('#main').innerHTML=`<section class="hero"><div><h1>熊猫<em>快递局</em></h1><div class="actions"><button class="primary" id="continueBtn">${done?'继续旅程':'出发'} <span>→</span></button>${save.best[25]?'<button class="secondary" id="journeyMemory">旅程纪念册</button>':''}</div></div>${art()}</section><div class="section-top"><h2>快递旅程</h2><div class="journey-counts"><span>已抵达 <b>${done}</b> / 25 站</span><span>★ ${Object.values(save.best).reduce((n,x)=>n+x.stars,0)} / 75</span></div></div><div class="chapters" role="group" aria-label="选择旅程章节">${['熊猫出川','一路向东','北上北京','南下广州','开往春城'].map((x,i)=>`<button class="chapter ${i===chapter?'selected':''}" data-chapter="${i}" aria-pressed="${i===chapter}">0${i+1} ${x}</button>`).join('')}</div><div class="level-grid">${C.slice(chapter*5,chapter*5+5).map(x=>stationCard(x,next)).join('')}</div><section class="save-transfer" aria-label="存档传递"><div class="save-actions"><button class="secondary" id="exportSaveBtn">导出存档</button><button class="secondary" id="importSaveBtn">导入存档</button></div><p>把存档发给朋友，导入后即可选择已解锁的关卡。</p><p id="saveStatus" role="status" aria-live="polite"></p><input type="file" id="importSaveFile" accept=".json,application/json" hidden></section>`;
+ $('#main').innerHTML=`<section class="hero"><div><h1>熊猫<em>快递局</em></h1><div class="actions"><button class="primary" id="continueBtn">${done?'继续旅程':'出发'} <span>→</span></button>${save.best[25]?'<button class="secondary" id="journeyMemory">旅程纪念册</button>':''}</div></div>${art()}</section><div class="section-top"><h2>快递旅程</h2><div class="journey-counts"><span>已抵达 <b>${done}</b> / 25 站</span><span>★ ${Object.values(save.best).reduce((n,x)=>n+x.stars,0)} / 75</span></div></div><div class="chapters" role="group" aria-label="选择旅程章节">${['熊猫出川','一路向东','北上北京','南下广州','开往春城'].map((x,i)=>`<button class="chapter ${i===chapter?'selected':''}" data-chapter="${i}" aria-pressed="${i===chapter}">0${i+1} ${x}</button>`).join('')}</div><div class="level-grid">${C.slice(chapter*5,chapter*5+5).map(x=>stationCard(x,next)).join('')}</div><section class="save-transfer" aria-label="存档管理"><div class="save-actions"><button class="secondary" id="exportSaveBtn">导出存档</button><button class="secondary" id="importSaveBtn">导入存档</button></div><p>把存档发给朋友，导入后即可选择已解锁的关卡。</p><p id="saveStatus" role="status" aria-live="polite"></p><input type="file" id="importSaveFile" accept=".json,application/json" hidden></section>`;
  bindProgressTransfer();
  $('#continueBtn').onclick=()=>prepare(next);if($('#journeyMemory'))$('#journeyMemory').onclick=showJourney;
  $('#courierBtn').onclick=greetCourier;
@@ -170,7 +170,7 @@ function tick(now){
  }
  if(state&&['playing','practice','countdown'].includes(state.mode))raf=requestAnimationFrame(tick);
 }
-function togglePause(){if(!state||!['playing','practice','countdown'].includes(state.mode))return;if(!state.paused){state.paused=true;showModal('<h2>已暂停</h2><img class="pause-panda" src="assets/panda.png" alt="休息中的熊猫快递员"><div class="modal-actions"><button class="primary" id="resume">继续</button><button class="secondary" id="pauseHome">返回首页</button></div>');$('#resume').onclick=()=>{closeModal();state.paused=false;state.last=performance.now();};$('#pauseHome').onclick=home;}}
+function togglePause(){if(!state||!['playing','practice','countdown'].includes(state.mode))return;if(!state.paused){state.paused=true;showModal('<h2>已暂停</h2><img class="pause-panda" src="assets/panda.png" alt="休息中的熊猫快递员"><div class="modal-actions"><button class="primary" id="resume">继续</button><button class="secondary" id="pauseSettings">设置</button><button class="secondary" id="pauseHome">返回首页</button></div>');$('#resume').onclick=()=>{closeModal();state.paused=false;state.last=performance.now();};$('#pauseSettings').onclick=showSettings;$('#pauseHome').onclick=home;}}
 function confirmLeave(action,title){if(!state||['ready','result','practiceWait'].includes(state.mode)){action();return;}state.paused=true;showModal(`<h2>${title}</h2><p>本局进度将重置。</p><div class="modal-actions"><button class="primary" id="confirm">确定</button><button class="secondary" id="cancel">继续游戏</button></div>`);$('#confirm').onclick=()=>{closeModal();action();};$('#cancel').onclick=()=>{closeModal();state.paused=false;state.last=performance.now();};}
 // Only annotate the two characters requested by the player. Each surface
 // owns its seen set, so the game heading cannot consume a card annotation.
@@ -188,8 +188,7 @@ function finish(){state.mode='result';cancelAnimationFrame(raf);const {level,cor
 }
 $('#homeBtn').onclick=()=>confirmLeave(home,'返回旅程首页？');
 $('#collectionBtn').onclick=()=>{if(state&&state.mode!=='result'&&state.mode!=='ready'){togglePause();return;}const cards=C.filter(x=>save.best[x.id]);showModal(`<h2>城市知识图鉴</h2><p class="collection-summary">已收藏 <strong>${cards.length} / 25</strong> 张</p><div class="collection">${cards.map(x=>{const reading=knowledgeReading(x);return `<article><h3>K${String(x.id).padStart(2,'0')} · ${reading.title}</h3><p>${reading.body}</p></article>`;}).join('')||'<p class="collection-empty">还没有知识卡</p>'}</div><div class="modal-actions"><button class="primary" id="closeCollection">关闭图鉴</button></div>`);$('#closeCollection').onclick=closeModal;};
-function renderSound(){const button=$('#soundBtn');button.textContent='音效 '+(save.sound?'开':'关');button.setAttribute('aria-pressed',String(!!save.sound));button.title=save.sound?'关闭音效':'开启音效';}
-$('#soundBtn').onclick=()=>{save.sound=!save.sound;persist();renderSound();if(save.sound)void ensureAudio();};renderSound();
+function toggleSound(){save.sound=!save.sound;persist();if(save.sound)void ensureAudio();}
 $('#modal').addEventListener('cancel',e=>{if(state?.paused)e.preventDefault();});
 for(const eventName of ['pointerdown','click'])document.addEventListener(eventName,e=>{if(e.target.closest('button'))void ensureAudio();},{capture:true});
 document.addEventListener('keydown',e=>{if(e.code==='Space'&&state&&['playing','practice'].includes(state.mode)&&!$('#modal').open){e.preventDefault();}if(e.code==='Escape'&&!$('#modal').open)togglePause();});

@@ -84,8 +84,6 @@
 .map-hub .hub-ring {fill:var(--route);}
 .map-hub .hub-gap {fill:#fff3d0;}
 .map-hub .hub-gold {fill:none;stroke:#e0b04f;stroke-width:2.2;}
-.map-hub .hub-brand-bg {fill:#265e42;}
-.map-hub .hub-brand {font:26px "STKaiti","KaiTi",serif;fill:#f1ce83;text-anchor:middle;}
 .map-hub .hub-label rect {fill:var(--route);stroke:#fff6dc;stroke-width:2;filter:drop-shadow(0 2px 1.5px #2f22104d);}
 .map-hub .hub-label text {font-size:14px;fill:#fffaf0;text-anchor:middle;letter-spacing:.5px;}
 .map-pin {pointer-events:none;}

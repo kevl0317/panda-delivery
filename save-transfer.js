@@ -22,9 +22,11 @@ function exportProgress(){
 }
 async function importProgress(file){
  if(!file)return;
+ const revision=++progressRevision;
  try{
   if(file.size>100*1024)throw new Error('文件过大，请选择熊猫快递局导出的存档。');
-  const imported=parseProgressFile(await file.text()),best={...save.best};
+  const text=await file.text();if(revision!==progressRevision)return;
+  const imported=parseProgressFile(text),best={...save.best};
   for(const [level,record] of Object.entries(imported)){
    const old=best[level];best[level]=old?{stars:Math.max(old.stars,record.stars),score:Math.max(old.score,record.score)}:record;
   }
@@ -32,7 +34,7 @@ async function importProgress(file){
   // Commit only after storage succeeds; a rejected file never changes progress.
   try{localStorage.setItem('panda-post-v1',JSON.stringify(merged));}catch{throw new Error('浏览器未能保存存档，原有进度未修改。请检查存储权限后重试。');}
   save=merged;home();progressNotice(`导入成功！已抵达 ${Object.keys(best).length} / 25 站，已保留更高成绩。`);
- }catch(error){progressNotice(error.message||'导入失败，原有进度未修改。');}
+ }catch(error){if(revision===progressRevision)progressNotice(error.message||'导入失败，原有进度未修改。');}
 }
 function bindProgressTransfer(){
  document.getElementById('exportSaveBtn').onclick=exportProgress;
