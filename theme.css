@@ -246,3 +246,10 @@ main.th-same>*,main.th-same .hero h1,main.th-same .hero .actions,main.th-same .c
  main>*,.hero h1,.hero .actions,.hero .actions .primary span,#continueBtn:after,.courier-button,.level-grid .station-stop,.station-stop .level.current,.station-stop:has(.current):before,.game-heading,.stats,.warehouse,.overlay>*,.count.th-tick,dialog[open],dialog::backdrop,.pause-panda,.result-stars span,.result-title,.result-metrics div,.chapter-seal,.th-result .result-knowledge,.th-result .modal-actions,.collection article,.stat.is-low strong {animation:none;}
  .th-confetti,.th-ripple,.catch-pop {display:none;}
 }
+
+/* Progress sharing stays on the home screen, away from delivery controls. */
+.save-transfer {margin:20px 0 28px;padding:18px;border:1px solid #bfa66b;border-radius:16px;background:#173d2eed;color:#fff1cb;}
+.save-actions {display:flex;gap:12px;flex-wrap:wrap;}
+.save-transfer p {margin:12px 0 0;font-size:14px;line-height:1.6;}
+.save-transfer #saveStatus:empty {display:none;}
+.save-transfer #saveStatus {color:#ffe296;font-weight:700;}

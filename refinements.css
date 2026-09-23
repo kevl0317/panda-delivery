@@ -274,3 +274,6 @@ dialog .collection-empty {padding:26px 14px;text-align:center;border:1px dashed 
  .two-lanes .tutorial-pair .tutorial-art {transform:scale(.55);}
  .two-lanes .overlay:has(.tutorial-pair) .practice-dots {font-size:26px;margin:4px;}
 }
+
+/* Invisible pointer margin leaves artwork and belt alignment unchanged. */
+.lane>.parcel:not(.done):not(:disabled)::before {content:"";position:absolute;inset:-14px;background:transparent;border:0;border-radius:12px;}

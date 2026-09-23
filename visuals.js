@@ -15,7 +15,22 @@ function itemIcon(kind){
  return `<svg class="item-icon" viewBox="0 0 48 48" role="img" aria-label="${kind}" style="color:${color};fill:currentColor">${shape}</svg>`;
 }
 function tutorialArt(level){
- const kinds=PandaEngine.kinds(level);
+ const kinds=PandaEngine.kinds(level),design=PandaEngine.config(level);
  const lane=kind=>`<div class="tutorial-art" aria-hidden="true"><div class="demo-track"></div><div class="demo-frame"><img src="assets/basket.png" alt="" draggable="false"><span>${itemIcon(kind)}</span></div><div class="demo-parcel"><img src="assets/parcel.png" alt="" draggable="false"><span>${itemIcon(kind)}</span></div><span class="demo-hand">👈</span><span class="demo-spark">✦</span></div>`;
- return PandaEngine.config(level).simultaneous?`<div class="tutorial-pair" aria-hidden="true">${kinds.slice(0,2).map(k=>`<div class="demo-lane">${lane(k)}</div>`).join('')}</div>`:lane(kinds[0]);
+ if(design.lanes===1)return lane(kinds[0]);
+ let timing='';
+ if(!design.simultaneous){
+  const order=design.laneMode==='alternating'?[0,1]:[0,1,1,0];
+  // Show only the active lane's parcel and pointing hand in each time slot.
+  timing='<style>'+[0,1].map(row=>{
+   const frames=order.map((active,i)=>{
+    const base=i/order.length*100,part=100/order.length,x=row?84:164;
+    return active!==row?`${base}% , ${base+part-.001}% {opacity:0;transform:translateX(0);}`:
+     `${base}% {opacity:1;transform:translateX(0);} ${base+part*.1}% {opacity:1;transform:translateX(0);} ${base+part*.5}%,${base+part*.65}% {opacity:1;transform:translateX(${x}px);} ${base+part*.8}%,${base+part-.001}% {opacity:0;transform:translate(${x}px,52px) scale(.35);}`;
+   }).join('');
+   const hand=order.map((active,i)=>{const base=i/order.length*100,part=100/order.length;return `${base}%,${base+part*.47}% {opacity:0;} ${base+part*.55}%,${base+part*.65}% {opacity:${active===row?1:0};} ${base+part*.75}%,${base+part-.001}% {opacity:0;}`;}).join('');
+   return `@keyframes demo-l${level}-${row}{${frames}100%{opacity:0;}}@keyframes demo-h${level}-${row}{${hand}100%{opacity:0;}}.tutorial-level-${level} .demo-lane:nth-child(${row+1}) .demo-parcel{animation:demo-l${level}-${row} ${order.length*3.7}s linear infinite;}.tutorial-level-${level} .demo-lane:nth-child(${row+1}) :is(.demo-hand,.demo-spark){animation:demo-h${level}-${row} ${order.length*3.7}s linear infinite;}`;
+  }).join('')+'</style>';
+ }
+ return `${timing}<div class="tutorial-pair tutorial-level-${level}" aria-hidden="true">${kinds.slice(0,2).map(k=>`<div class="demo-lane">${lane(k)}</div>`).join('')}</div>`;
 }

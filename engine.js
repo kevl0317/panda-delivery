@@ -71,8 +71,9 @@
   function position(elapsed,duration){return .05+.9*Math.max(0,Math.min(1,(elapsed-.65)/(duration-.9)));}
   function timeAt(x,duration){return .65+(x-.05)/.9*(duration-.9);}
   function result(level,correct){const target=correct/round(level).total,score=Math.round(target*100),win=correct>=config(level).pass;return {target,score,win,stars:win?(score>=95?3:score>=90?2:1):0};}
-  function hit(x){return [.25,.52,.79].findIndex(c=>Math.abs(x-c)<=.105);}
-  const api={ROUND,round,cities,config,kinds,allowed,baskets,sequence,duration,position,timeAt,result,hit};
+  const HIT_RADIUS=.13;
+  function hit(x){return [.25,.52,.79].findIndex(c=>Math.abs(x-c)<=HIT_RADIUS+1e-9);}
+  const api={HIT_RADIUS,ROUND,round,cities,config,kinds,allowed,baskets,sequence,duration,position,timeAt,result,hit};
   if(typeof module!=='undefined') module.exports=api;
   root.PandaEngine=api;
 })(typeof window!=='undefined'?window:globalThis);

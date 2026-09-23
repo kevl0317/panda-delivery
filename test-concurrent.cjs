@@ -47,6 +47,27 @@ async function place(page,lane,column){
   assert.equal(await page.locator('#lane0 .basket img').first().evaluate(img=>img.dispatchEvent(new DragEvent('dragstart',{bubbles:true,cancelable:true}))),false);
   assert.ok(await page.locator('#warehouse .basket, #warehouse .parcel, #warehouse .destination-icon').evaluateAll(els=>els.every(el=>getComputedStyle(el).userSelect==='none')));
 
+  // New early/late tolerance accepts edge clicks outside the drawn parcel.
+  for(const delta of [-.125,.125]){
+   await start(page,25);
+   await page.evaluate(delta=>{
+    const c=state.parcels[0];c.kind=state.basketRows[0][1];mountParcel(c);
+    c.elapsed=E.timeAt(.52+delta,E.duration(25,0));state.last=performance.now();tick(state.last);cancelAnimationFrame(raf);
+   },delta);
+   const rect=await page.locator('#parcel0').boundingBox();
+   await page.mouse.click(rect.x-10,rect.y+rect.height/2);
+   assert.equal(await page.evaluate(()=>state.correct),1,'Near-edge pointer click accepts the expanded time window');
+   assert.equal(await page.evaluate(()=>state.parcels[1].resolved),false);
+  }
+  await start(page,25);
+  await page.evaluate(()=>{
+   const c=state.parcels[0];c.kind=state.basketRows[0][1];mountParcel(c);
+   c.elapsed=E.timeAt(.385,E.duration(25,0));state.last=performance.now();tick(state.last);cancelAnimationFrame(raf);
+  });
+  await page.locator('#parcel0').click({force:true});
+  assert.deepEqual(await page.evaluate(()=>({correct:state.correct,wrong:state.wrong,resolved:state.parcels[0].resolved})),{correct:0,wrong:0,resolved:false},'Gap between baskets stays neutral');
+  await start(page,21);
+
   // A completed upper parcel leaves the lower parcel independently usable.
   await place(page,0);
   const lowerBefore=await page.evaluate(()=>({...state.parcels.find(c=>c.lane===1)}));

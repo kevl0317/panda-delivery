@@ -65,7 +65,7 @@ try{
   assert.ok(waves*seconds<=round.seconds,'Every parcel gets a complete journey within the round');
   for(const x of [.25,.52,.79]){
    assert.ok(Math.abs(E.position(E.timeAt(x,seconds),seconds)-x)<.001);
-   assert.ok(E.timeAt(x+.105,seconds)-E.timeAt(x-.105,seconds)>=.769,'Keep at least 0.77 seconds to click in the finale');
+   assert.ok(E.timeAt(x+E.HIT_RADIUS,seconds)-E.timeAt(x-E.HIT_RADIUS,seconds)>=.953,'Keep at least 0.95 seconds to click in the finale');
   }
  }
  for(const value of [0,.5,.999]){Math.random=()=>value;for(let l=1;l<=25;l++){checkSequence(l);checkBaskets(l);}}
@@ -89,3 +89,9 @@ for(let level=22;level<=25;level++)assert.ok(E.duration(level,0)<E.duration(leve
 assert.ok(E.duration(25,0)<E.duration(20,0),'The final stage exceeds the previous chapter peak speed');
 assert.equal(E.hit(.05),-1);assert.equal(E.hit(.25),0);assert.equal(E.hit(.52),1);assert.equal(E.hit(.79),2);
 console.log('PASS: balanced schedules, all paired basket permutations, distinct targets with 0.99s separation, bounded generation, slower speeds, stage21 reset, scoring and click windows.');
+
+for(const [i,center] of [.25,.52,.79].entries()){
+ assert.equal(E.hit(center-.13),i);assert.equal(E.hit(center+.13),i);
+ assert.equal(E.hit(center-.131),-1);assert.equal(E.hit(center+.131),-1);
+}
+assert.equal(E.hit(.385),-1);assert.equal(E.hit(.655),-1);
