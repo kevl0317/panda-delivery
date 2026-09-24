@@ -13,12 +13,12 @@
 .demo-frame>span {left:50%;top:calc(100% - 16px);bottom:auto;transform:translateX(-50%);height:14px;display:flex;align-items:center;justify-content:center;}
 .demo-frame>span .item-icon {width:auto;height:100%;}
 .belt {
-  background:url('assets/conveyor.png') center 48% / 100% 285% no-repeat;
+  background:url('../assets/conveyor.png') center 48% / 100% 285% no-repeat;
   border:0; box-shadow:none; border-radius:0;
 }
 .belt:before,.belt:after {display:none;}
 .two-lanes .lane.lit .belt {border:0;box-shadow:none;filter:drop-shadow(0 0 7px #ffdc78);}
-.demo-track {background:url('assets/conveyor.png') center 48% / 100% 285% no-repeat;border:0;box-shadow:none;}
+.demo-track {background:url('../assets/conveyor.png') center 48% / 100% 285% no-repeat;border:0;box-shadow:none;}
 .demo-parcel {top:calc(52px + 24px * .52 - 67px * .89);}
 .demo-parcel>img {filter:drop-shadow(0 2px 1px #10271c66);}
 

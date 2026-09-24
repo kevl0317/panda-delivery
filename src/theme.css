@@ -121,7 +121,7 @@ nav {background:linear-gradient(#1e4e39eb,#143628eb);border-color:#d8b56a66;box-
 .catch-pop {position:absolute;z-index:6;translate:-50% 0;pointer-events:none;font:900 28px/1 "Microsoft YaHei",sans-serif;color:#fff6b8;text-shadow:0 2px 0 #3b6a2c,0 0 14px #ffe27a;animation:th-pop-up .8s ease-out forwards;}
 .catch-pop.is-bad {color:#ffd3bd;text-shadow:0 2px 0 #8a3b2a,0 0 12px #ff9d7a;}
 .feedback {display:inline-flex;align-items:center;gap:9px;padding:5px 18px 5px 5px;border:1.5px solid #d8b56a80;border-radius:99px;background:linear-gradient(#1f5039,#133526);box-shadow:0 6px 14px #06170f59;}
-.feedback:before {content:"";flex:none;width:28px;height:28px;border-radius:50%;background:#fff3d0 url(assets/panda.png) -16.6px -3.7px/60.6px auto no-repeat;box-shadow:0 0 0 2px #d8b56a;}
+.feedback:before {content:"";flex:none;width:28px;height:28px;border-radius:50%;background:#fff3d0 url(../assets/panda.png) -16.6px -3.7px/60.6px auto no-repeat;box-shadow:0 0 0 2px #d8b56a;}
 .feedback.bad {border-color:#e6a47a99;background:linear-gradient(#6b3a26,#4a2718);}
 .feedback.th-pop {animation:th-bubble .38s cubic-bezier(.3,1.7,.5,1);}
 

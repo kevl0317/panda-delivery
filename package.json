@@ -1,0 +1,16 @@
+{
+  "name": "panda-delivery",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "熊猫快递局网页游戏",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "dev": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/serve.mjs --dist"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
